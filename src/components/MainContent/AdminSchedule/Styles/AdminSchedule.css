@@ -1,0 +1,66 @@
+/* Основной контейнер */
+.admin-schedule-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.admin-schedule-content{
+  display: flex;
+  width: 80%;
+  margin-top: 5%;
+  border: 1px solid #353535;
+  border-radius: 20px;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 200px;
+  border-right: 1px solid #ccc;
+  padding: 20px;
+  color: white;
+  border-radius: 20px 0px 00px 20px;
+  background-color: #333;
+}
+
+.sidebar h3 {
+  margin-top: 0;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar li {
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.sidebar li:hover {
+  background-color: #ddd;
+}
+
+.sidebar li.active {
+  background-color: #bbb;
+  font-weight: bold;
+}
+
+/* Основное содержимое */
+.schedule-content {
+  flex: 1;
+  padding: 20px;
+}
+
+.schedule-content table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.schedule-content th,
+.schedule-content td {
+  border: 1px solid #ccc;
+  padding: 5px;
+  text-align: center;
+}

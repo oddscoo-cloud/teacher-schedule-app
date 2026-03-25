@@ -13,7 +13,7 @@ function Header(){
             </div>
             
             <div>
-                <a href="/login" className="sign-in-href"><h1>Вход</h1></a>
+                <a href="/login" className="sign-in-href"><h1>Sign in</h1></a>
             </div>
         </div>
     </>
