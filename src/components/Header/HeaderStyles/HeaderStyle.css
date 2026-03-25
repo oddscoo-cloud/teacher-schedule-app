@@ -1,0 +1,17 @@
+.header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #333;
+    color: white;
+}
+.sign-in-href{
+    color: white;
+    text-decoration: none;
+}
+
+.sign-in-href:hover{
+    color: gray;
+    text-decoration: none;
+}
