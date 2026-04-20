@@ -1,0 +1,10 @@
+# Visual Studio
+.vs/
+bin/
+obj/
+
+# Node (React)
+node_modules/
+
+# env
+.env
