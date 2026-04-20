@@ -1,0 +1,23 @@
+
+
+.header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background: linear-gradient(45deg, #751279 50%, #333 50%);
+    color: white;
+    height: 50px;
+    /* box-shadow: #333333 0px 1px 10px, #333333 0px 6px 10px, #333333 0px 12px 24px, #333333 0px 24px 20px; */
+}
+
+
+.sign-in-href{
+    color: white;
+    text-decoration: none;
+}
+
+.sign-in-href:hover{
+    color: gray;
+    text-decoration: none;
+}
