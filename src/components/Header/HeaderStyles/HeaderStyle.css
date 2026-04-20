@@ -1,13 +1,4 @@
-@keyframes opacity {
-  from {
-    opacity: 0;
-  }
 
-  to {
-    opacity: 1;
-
-  }
-}
 
 .header{
     display: flex;
@@ -17,10 +8,7 @@
     background: linear-gradient(45deg, #751279 50%, #333 50%);
     color: white;
     height: 50px;
-    animation-duration: 2s;
-    animation-name: opacity;
-    animation-iteration-count: 1;
-    box-shadow: #333333 0px 1px 10px, #333333 0px 6px 10px, #333333 0px 12px 24px, #333333 0px 24px 20px;
+    /* box-shadow: #333333 0px 1px 10px, #333333 0px 6px 10px, #333333 0px 12px 24px, #333333 0px 24px 20px; */
 }
 
 

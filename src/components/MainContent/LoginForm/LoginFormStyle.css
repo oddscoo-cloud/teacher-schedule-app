@@ -19,7 +19,7 @@
     align-items: center;
     padding: 50px;
     background-color: #333333;
-    box-shadow: #333333 0px 1px 10px, #333333 0px 6px 10px, #333333 0px 12px 24px, #333333 0px 24px 20px;
+    /* box-shadow: #333333 0px 1px 10px, #333333 0px 6px 10px, #333333 0px 12px 24px, #333333 0px 24px 20px; */
     color: white;
     border-radius: 8px;
 }
