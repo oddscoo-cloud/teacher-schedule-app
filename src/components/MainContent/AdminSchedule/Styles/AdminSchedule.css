@@ -1,66 +1,53 @@
-/* Основной контейнер */
-.admin-schedule-container {
+.admin-container {
   display: flex;
-  justify-content: center;
-  width: 100%;
 }
 
-.admin-schedule-content{
-  display: flex;
-  width: 80%;
-  margin-top: 5%;
-  border: 1px solid #353535;
-  border-radius: 20px;
-}
-
-/* Sidebar */
 .sidebar {
   width: 200px;
-  border-right: 1px solid #ccc;
-  padding: 20px;
-  color: white;
-  border-radius: 20px 0px 00px 20px;
-  background-color: #333;
-}
-
-.sidebar h3 {
-  margin-top: 0;
-}
-
-.sidebar ul {
-  list-style: none;
-  padding: 0;
+  background: #f4f4f4;
+  padding: 15px;
 }
 
 .sidebar li {
-  padding: 8px;
   cursor: pointer;
-  border-radius: 4px;
+  padding: 6px;
 }
 
-.sidebar li:hover {
-  background-color: #ddd;
+.sidebar .active {
+  background: #ccc;
 }
 
-.sidebar li.active {
-  background-color: #bbb;
-  font-weight: bold;
-}
-
-/* Основное содержимое */
-.schedule-content {
+.content {
   flex: 1;
   padding: 20px;
 }
 
-.schedule-content table {
-  border-collapse: collapse;
-  width: 100%;
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
 }
 
-.schedule-content th,
-.schedule-content td {
-  border: 1px solid #ccc;
-  padding: 5px;
-  text-align: center;
+.day-column {
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.lesson-card {
+  background: #e3f2fd;
+  padding: 6px;
+  margin-bottom: 6px;
+  border-radius: 4px;
+  position: relative;
+}
+
+.lesson-card button {
+  position: absolute;
+  top: 2px;
+  right: 5px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: red;
 }

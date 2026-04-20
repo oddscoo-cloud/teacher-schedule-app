@@ -1,15 +1,14 @@
 import React, { useState } from "react";
 import { teachers } from "../../../data/teachers";
-import "./Styles/AdminSchedule.css";
-import AdminScheduleSidebar from "./components/AdminScheduleSibebar";
-import AdminScheduleTable from "./components/AdminScheduleTable";
+import "../AdminSchedule/Styles/AdminSchedule.css";
 
 const daysOfWeek = ["Пн", "Вт", "Ср", "Чт", "Пт"];
 
 const AdminSchedule = () => {
   const [teacherData, setTeacherData] = useState(teachers);
-  const [selectedTeacher, setSelectedTeacher] = useState(null);
+  const [selectedTeacherId, setSelectedTeacherId] = useState(null);
   const [showForm, setShowForm] = useState(false);
+
   const [form, setForm] = useState({
     day: "Пн",
     start: "",
@@ -17,110 +16,179 @@ const AdminSchedule = () => {
     lesson: "",
   });
 
+  const selectedTeacher = teacherData.find(
+    (t) => t.id === selectedTeacherId
+  );
+
+  const toMinutes = (timeStr) => {
+    const [h, m] = timeStr.split(":").map(Number);
+    return h * 60 + m;
+  };
+
+  const isOverlapping = (newLesson) => {
+    const newStart = toMinutes(newLesson.start);
+    const newEnd = toMinutes(newLesson.end);
+
+    return selectedTeacher.schedule.some((l) => {
+      if (l.day !== newLesson.day) return false;
+      const existingStart = toMinutes(l.start);
+      const existingEnd = toMinutes(l.end);
+
+      return (newStart < existingEnd && newEnd > existingStart);
+    });
+  }
+
+  // ➕ добавление
   const addLesson = () => {
     if (!selectedTeacher) return;
 
     const newLesson = {
+      id: Date.now() + Math.random(), 
       day: form.day,
       start: form.start,
       end: form.end,
       lesson: form.lesson,
     };
 
-    if (isOverlapping(selectedTeacher.schedule, newLesson)) {
-      alert("Ошибка: урок пересекается с другим!");
+    if (isOverlapping(newLesson)) {
+      alert("Этот урок пересекается с уже существующим!");
       return;
     }
 
     setTeacherData((prev) =>
       prev.map((t) =>
-        t.id === selectedTeacher.id
+        t.id === selectedTeacherId
           ? { ...t, schedule: [...t.schedule, newLesson] }
           : t
       )
     );
 
-    setSelectedTeacher((prev) => ({
-      ...prev,
-      schedule: [...prev.schedule, newLesson],
-    }));
-
     setForm({ day: "Пн", start: "", end: "", lesson: "" });
     setShowForm(false);
   };
 
-  const toMinutes = (time) => {
-    const [hours, minutes] = time.split(":").map(Number);
-    return hours * 60 + minutes;
-  }
-
-  const isOverlapping = (existingLessons, newLesson) => {
-    const newStart = toMinutes(newLesson.start);
-    const newEnd = toMinutes(newLesson.end);
-
-    return existingLessons.some((lesson) => {
-      if (lesson.day !== newLesson.day) return false;
-
-      const start = toMinutes(lesson.start);
-      const end = toMinutes(lesson.end);
-
-      return newStart < end && newEnd > start;
-    });
+  // ❌ удаление
+  const deleteLesson = (teacherId, lessonId) => {
+    setTeacherData((prev) =>
+      prev.map((t) =>
+        t.id === teacherId
+          ? {
+              ...t,
+              schedule: t.schedule.filter((l) => l.id !== lessonId),
+            }
+          : t
+      )
+    );
   };
 
   return (
-    <div className="admin-schedule-container">
-      <div className="admin-schedule-content">
-        {/* Sidebar с именами учителей */}
-        <AdminScheduleSidebar
-          teachers={teachers}
-          selectedTeacher={selectedTeacher}
-          onSelectTeacher={setSelectedTeacher}
-        />
-
-        {/* Основное содержимое — таблица расписания */}
-        <AdminScheduleTable
-          selectedTeacher={selectedTeacher}
-          daysOfWeek={daysOfWeek}
-        />
-
-        <button onClick={() => setShowForm(!showForm)}>
-          Добавить урок
-        </button>
-
-        {showForm && (
-          <div className="lesson-form">
-            <select
-              value={form.day}
-              onChange={(e) => setForm({ ...form, day: e.target.value })}
+    <div className="admin-container">
+      {/* Sidebar */}
+      <div className="sidebar">
+        <h3>Учителя</h3>
+        <ul>
+          {teacherData.map((t) => (
+            <li
+              key={t.id}
+              className={selectedTeacherId === t.id ? "active" : ""}
+              onClick={() => setSelectedTeacherId(t.id)}
             >
-              <option>Пн</option>
-              <option>Вт</option>
-              <option>Ср</option>
-              <option>Чт</option>
-              <option>Пт</option>
-            </select>
+              {t.name}
+            </li>
+          ))}
+        </ul>
+      </div>
 
-            <input
-              placeholder="Начало (09:00)"
-              value={form.start}
-              onChange={(e) => setForm({ ...form, start: e.target.value })}
-            />
+      {/* Контент */}
+      <div className="content">
+        {selectedTeacher ? (
+          <>
+            <h2>{selectedTeacher.name}</h2>
 
-            <input
-              placeholder="Конец (10:30)"
-              value={form.end}
-              onChange={(e) => setForm({ ...form, end: e.target.value })}
-            />
+            {/* КНОПКА */}
+            <button onClick={() => setShowForm(!showForm)}>
+              Добавить урок
+            </button>
 
-            <input
-              placeholder="Предмет"
-              value={form.lesson}
-              onChange={(e) => setForm({ ...form, lesson: e.target.value })}
-            />
+            {/* ФОРМА */}
+            {showForm && (
+              <div className="lesson-form">
+                <select
+                  value={form.day}
+                  onChange={(e) =>
+                    setForm({ ...form, day: e.target.value })
+                  }
+                >
+                  {daysOfWeek.map((d) => (
+                    <option key={d}>{d}</option>
+                  ))}
+                </select>
 
-            <button onClick={addLesson}>Сохранить</button>
-          </div>
+                <input
+                  placeholder="09:00"
+                  value={form.start}
+                  onChange={(e) =>
+                    setForm({ ...form, start: e.target.value })
+                  }
+                />
+
+                <input
+                  placeholder="10:30"
+                  value={form.end}
+                  onChange={(e) =>
+                    setForm({ ...form, end: e.target.value })
+                  }
+                />
+
+                <input
+                  placeholder="Предмет"
+                  value={form.lesson}
+                  onChange={(e) =>
+                    setForm({ ...form, lesson: e.target.value })
+                  }
+                />
+
+                <button onClick={addLesson}>Сохранить</button>
+              </div>
+            )}
+
+            {/* КАЛЕНДАРЬ */}
+            <div className="week-grid">
+              {daysOfWeek.map((day) => {
+                const lessons = selectedTeacher.schedule
+                  .filter((s) => s.day === day)
+                  .sort((a, b) => a.start.localeCompare(b.start));
+
+                return (
+                  <div key={day} className="day-column">
+                    <h3>{day}</h3>
+
+                    {lessons.length === 0 ? (
+                      <p className="empty">Нет уроков</p> ) : (
+                      lessons.map((l) => (
+                        <div key={l.id} className="lesson-card">
+                          <strong>{l.lesson}</strong>
+                          <div>
+                            {l.start} - {l.end}
+                          </div>
+
+                          <button
+                            onClick={() => {deleteLesson(selectedTeacherId, l.id)
+                              console.log("Удалён урок с id:", l.id, "у учителя с id:", selectedTeacherId);
+                            }}
+                          >
+                            ✖
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          <p>Выбери учителя</p>
         )}
       </div>
     </div>
