@@ -5,15 +5,14 @@ function Header(){
     return (
     <>
         <div className="header">
-            <div>
-                <h2>Logo</h2>
-            </div>
-            <div>
-                <h1>School Name</h1>
+            <div className="header-logo-section">
+                <h1 className="header-title">Менеджер уроків</h1>
             </div>
             
             <div>
-                <a href="/login" className="sign-in-href"><h1>Sign in</h1></a>
+                <button className="login-button-header">
+                    <a href="/login" className="login-link">Вхід</a>
+                </button>
             </div>
         </div>
     </>

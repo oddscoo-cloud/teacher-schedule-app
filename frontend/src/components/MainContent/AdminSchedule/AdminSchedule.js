@@ -1,11 +1,10 @@
-import React, { useState } from "react";
-import { teachers } from "../../../data/teachers";
+import React, { useState, useEffect } from "react";
 import "../AdminSchedule/Styles/AdminSchedule.css";
 
 const daysOfWeek = ["Пн", "Вт", "Ср", "Чт", "Пт"];
 
 const AdminSchedule = () => {
-  const [teacherData, setTeacherData] = useState(teachers);
+  const [teacherData, setTeacherData] = useState([]);
   const [selectedTeacherId, setSelectedTeacherId] = useState(null);
   const [showForm, setShowForm] = useState(false);
 
@@ -13,79 +12,121 @@ const AdminSchedule = () => {
     day: "Пн",
     start: "",
     end: "",
-    lesson: "",
+    lessonName: "",
   });
 
-  const selectedTeacher = teacherData.find(
-    (t) => t.id === selectedTeacherId
-  );
-
-  const toMinutes = (timeStr) => {
-    const [h, m] = timeStr.split(":").map(Number);
-    return h * 60 + m;
+  const fetchTeachers = async () => {
+    const res = await fetch("https://localhost:7151/api/teachers", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    const data = await res.json();
+    setTeacherData(data);
   };
 
-  const isOverlapping = (newLesson) => {
-    const newStart = toMinutes(newLesson.start);
-    const newEnd = toMinutes(newLesson.end);
+  useEffect(() => {
+    fetchTeachers();
+  }, []);
 
-    return selectedTeacher.schedule.some((l) => {
-      if (l.day !== newLesson.day) return false;
-      const existingStart = toMinutes(l.start);
-      const existingEnd = toMinutes(l.end);
+  const selectedTeacher = teacherData.find(
+    (t) => t.id === Number(selectedTeacherId)
+  );
 
-      return (newStart < existingEnd && newEnd > existingStart);
-    });
-  }
+  const addLesson = async () => {
+    if (!selectedTeacherId) return;
 
-  // ➕ добавление
-  const addLesson = () => {
-    if (!selectedTeacher) return;
-
-    const newLesson = {
-      id: Date.now() + Math.random(), 
-      day: form.day,
-      start: form.start,
-      end: form.end,
-      lesson: form.lesson,
-    };
-
-    if (isOverlapping(newLesson)) {
-      alert("Этот урок пересекается с уже существующим!");
+    if (!form.lessonName || !form.start || !form.end) {
+      alert("Заповніть усі поля");
       return;
     }
 
-    setTeacherData((prev) =>
-      prev.map((t) =>
-        t.id === selectedTeacherId
-          ? { ...t, schedule: [...t.schedule, newLesson] }
-          : t
-      )
+    // Валідація формату часу
+    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    if (!timeRegex.test(form.start) || !timeRegex.test(form.end)) {
+      alert("Неправильний формат часу. Використовуйте HH:MM (наприклад, 09:00)");
+      return;
+    }
+
+    // Проверка, что время начала раньше времени окончания
+    const [startHour, startMin] = form.start.split(":").map(Number);
+    const [endHour, endMin] = form.end.split(":").map(Number);
+    const startTotalMin = startHour * 60 + startMin;
+    const endTotalMin = endHour * 60 + endMin;
+
+    if (startTotalMin >= endTotalMin) {
+      alert("Час початку повинен бути раніше часу завершення");
+      return;
+    }
+
+    // Проверка пересечения с существующими уроками
+    const existingLessons = (selectedTeacher.lessons || []).filter(
+      (lesson) => lesson.day === form.day
     );
 
-    setForm({ day: "Пн", start: "", end: "", lesson: "" });
-    setShowForm(false);
+    const hasConflict = existingLessons.some((lesson) => {
+      const [existingStartHour, existingStartMin] = lesson.start
+        .split(":")
+        .map(Number);
+      const [existingEndHour, existingEndMin] = lesson.end.split(":").map(Number);
+      const existingStartTotalMin = existingStartHour * 60 + existingStartMin;
+      const existingEndTotalMin = existingEndHour * 60 + existingEndMin;
+
+      // Проверяем пересечение: start1 < end2 И start2 < end1
+      return startTotalMin < existingEndTotalMin && existingStartTotalMin < endTotalMin;
+    });
+
+    if (hasConflict) {
+      alert("Час перетинається з існуючим уроком цього дня");
+      return;
+    }
+
+    await fetch(
+      `https://localhost:7151/api/teachers/${selectedTeacherId}/lesson`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          day: form.day,
+          start: form.start,
+          end: form.end,
+          lessonName: form.lessonName,
+        }),
+      }
+    );
+
+    await fetchTeachers();
+
+    setForm({
+      day: "Пн",
+      start: "",
+      end: "",
+      lessonName: "",
+    });
   };
 
-  // ❌ удаление
-  const deleteLesson = (teacherId, lessonId) => {
-    setTeacherData((prev) =>
-      prev.map((t) =>
-        t.id === teacherId
-          ? {
-              ...t,
-              schedule: t.schedule.filter((l) => l.id !== lessonId),
-            }
-          : t
-      )
+  const deleteLesson = async (lessonId) => {
+    await fetch(
+      `https://localhost:7151/api/teachers/${selectedTeacherId}/lesson/${lessonId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
     );
+
+    await fetchTeachers();
   };
 
   return (
     <div className="admin-container">
-      {/* Sidebar */}
+      {/* SIDEBAR */}
       <div className="sidebar">
-        <h3>Учителя</h3>
+        <h3>Вчителі</h3>
         <ul>
           {teacherData.map((t) => (
             <li
@@ -99,15 +140,14 @@ const AdminSchedule = () => {
         </ul>
       </div>
 
-      {/* Контент */}
+      {/* КОНТЕНТ */}
       <div className="content">
         {selectedTeacher ? (
           <>
             <h2>{selectedTeacher.name}</h2>
 
-            {/* КНОПКА */}
-            <button onClick={() => setShowForm(!showForm)}>
-              Добавить урок
+            <button className="toggle-form-button" onClick={() => setShowForm(!showForm)}>
+              Додати урок
             </button>
 
             {/* ФОРМА */}
@@ -142,20 +182,19 @@ const AdminSchedule = () => {
 
                 <input
                   placeholder="Предмет"
-                  value={form.lesson}
+                  value={form.lessonName}
                   onChange={(e) =>
-                    setForm({ ...form, lesson: e.target.value })
+                    setForm({ ...form, lessonName: e.target.value })
                   }
                 />
 
-                <button onClick={addLesson}>Сохранить</button>
+                <button onClick={addLesson}>Зберегти</button>
               </div>
             )}
-
-            {/* КАЛЕНДАРЬ */}
+           {/* КАЛЕНДАРЬ */}
             <div className="week-grid">
               {daysOfWeek.map((day) => {
-                const lessons = selectedTeacher.schedule
+                const lessons = (selectedTeacher.lessons || [])
                   .filter((s) => s.day === day)
                   .sort((a, b) => a.start.localeCompare(b.start));
 
@@ -164,20 +203,17 @@ const AdminSchedule = () => {
                     <h3>{day}</h3>
 
                     {lessons.length === 0 ? (
-                      <p className="empty">Нет уроков</p> ) : (
+                      <p className="empty">Немає уроків</p>
+                    ) : (
                       lessons.map((l) => (
                         <div key={l.id} className="lesson-card">
-                          <strong>{l.lesson}</strong>
+                          <strong>{l.lessonName}</strong>
                           <div>
                             {l.start} - {l.end}
                           </div>
 
-                          <button
-                            onClick={() => {deleteLesson(selectedTeacherId, l.id)
-                              console.log("Удалён урок с id:", l.id, "у учителя с id:", selectedTeacherId);
-                            }}
-                          >
-                            ✖
+                          <button onClick={() => deleteLesson(l.id)}>
+                            x
                           </button>
                         </div>
                       ))
@@ -188,7 +224,7 @@ const AdminSchedule = () => {
             </div>
           </>
         ) : (
-          <p>Выбери учителя</p>
+          <p>Виберіть вчителя</p>
         )}
       </div>
     </div>
