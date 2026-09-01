@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./LoginFormStyle.css";
 import { useNavigate } from "react-router-dom";
-import Header from "../../Header/Header";
 
 const LoginForm = ({ onLogin }) => {
   const [username, setUsername] = useState("");

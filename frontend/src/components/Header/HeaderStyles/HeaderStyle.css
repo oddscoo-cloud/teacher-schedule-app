@@ -1,14 +1,18 @@
 
 .header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 15px 30px;
     color: white;
     height: 70px;
+    width: 100%;
     border-bottom: 2px solid #8C0286;
-    background: linear-gradient(90deg, rgba(18, 2, 35, 0.95) 0%, rgba(67, 3, 87, 0.8) 100%);
-    backdrop-filter: blur(10px);
+    background: linear-gradient(90deg, rgba(18, 2, 35, 0.96) 0%, rgba(67, 3, 87, 0.9) 100%);
+    backdrop-filter: blur(12px);
     box-shadow: 0 4px 8px rgba(140, 2, 134, 0.4), 
                 0 0 20px rgba(140, 2, 134, 0.3),
                 0 0 40px rgba(196, 3, 97, 0.15),

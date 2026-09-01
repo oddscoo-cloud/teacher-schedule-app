@@ -187,6 +187,13 @@ const AdminSchedule = () => {
                     setForm({ ...form, lessonName: e.target.value })
                   }
                 />
+                <input
+                  placeholder="Опис (необов'язково)"
+                  value={form.lessonName}
+                  onChange={(e) =>
+                    setForm({ ...form, lessonName: e.target.value })
+                  }
+                />
 
                 <button onClick={addLesson}>Зберегти</button>
               </div>
