@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../AdminSchedule/Styles/AdminSchedule.css";
+import Header from "../../Header/Header";
 
 const daysOfWeek = ["Пн", "Вт", "Ср", "Чт", "Пт"];
 
@@ -123,6 +124,7 @@ const AdminSchedule = () => {
   };
 
   return (
+    
     <div className="admin-container">
       {/* SIDEBAR */}
       <div className="sidebar">

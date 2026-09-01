@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./TeacherSchedule.css";
+import Header from "../../Header/Header";
 
 const daysOfWeek = ["Пн", "Вт", "Ср", "Чт", "Пт"];
 
@@ -40,6 +41,7 @@ const TeacherSchedule = () => {
 
   return (
     <div className="teacher-schedule">
+      
       <h2>Моё расписание: {teacher.name}</h2>
 
       <div className="week-grid">

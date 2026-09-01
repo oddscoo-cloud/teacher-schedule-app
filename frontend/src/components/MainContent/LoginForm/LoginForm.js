@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./LoginFormStyle.css";
 import { useNavigate } from "react-router-dom";
+import Header from "../../Header/Header";
 
 const LoginForm = ({ onLogin }) => {
   const [username, setUsername] = useState("");
@@ -73,6 +74,8 @@ const LoginForm = ({ onLogin }) => {
   return (
     <>
       <div className="login-form-container">
+        
+
         <div className="login-form" ref={formRef}>
           <form onSubmit={handleSubmit} className="form">
             
