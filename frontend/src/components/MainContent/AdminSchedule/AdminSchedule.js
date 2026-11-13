@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../AdminSchedule/Styles/AdminSchedule.css";
 import Header from "../../Header/Header";
+import API_BASE_URL from "../../../api";
 
 const daysOfWeek = ["Пн", "Вт", "Ср", "Чт", "Пт"];
 
@@ -17,7 +18,7 @@ const AdminSchedule = () => {
   });
 
   const fetchTeachers = async () => {
-    const res = await fetch("https://localhost:7151/api/teachers", {
+    const res = await fetch(`${API_BASE_URL}/teachers`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
@@ -83,7 +84,7 @@ const AdminSchedule = () => {
     }
 
     await fetch(
-      `https://localhost:7151/api/teachers/${selectedTeacherId}/lesson`,
+      `${API_BASE_URL}/teachers/${selectedTeacherId}/lesson`,
       {
         method: "POST",
         headers: {
@@ -111,7 +112,7 @@ const AdminSchedule = () => {
 
   const deleteLesson = async (lessonId) => {
     await fetch(
-      `https://localhost:7151/api/teachers/${selectedTeacherId}/lesson/${lessonId}`,
+      `${API_BASE_URL}/teachers/${selectedTeacherId}/lesson/${lessonId}`,
       {
         method: "DELETE",
         headers: {

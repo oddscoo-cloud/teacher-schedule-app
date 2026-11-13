@@ -1,5 +1,22 @@
 # Getting Started with Create React App
 
+## Run the full application with Docker
+
+From the repository root, copy `.env.example` to `.env`, then run:
+
+```powershell
+Copy-Item .env.example .env
+docker compose up --build
+```
+
+Open the frontend at <http://localhost:3000>. The API and Swagger UI are at
+<http://localhost:5101> and <http://localhost:5101/swagger>. SQL Server data
+is stored in the `sql_data` Docker volume.
+
+The credentials in `.env.example` are for local development only. Change them
+before using this setup outside a trusted local machine. Stop the containers
+with `docker compose down`; this keeps the database volume.
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./TeacherSchedule.css";
 import Header from "../../Header/Header";
+import API_BASE_URL from "../../../api";
 
 const daysOfWeek = ["Пн", "Вт", "Ср", "Чт", "Пт"];
 
@@ -14,7 +15,7 @@ const TeacherSchedule = () => {
     const fetchTeacher = async () => {
       try {
         const res = await fetch(
-          `https://localhost:7151/api/teachers/${teacherId}`,
+          `${API_BASE_URL}/teachers/${teacherId}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import "./LoginFormStyle.css";
 import { useNavigate } from "react-router-dom";
 import Header from "../../Header/Header";
+import API_BASE_URL from "../../../api";
 
 const LoginForm = ({ onLogin }) => {
   const [username, setUsername] = useState("");
@@ -34,7 +35,7 @@ const LoginForm = ({ onLogin }) => {
     e.preventDefault();
 
     try {
-      const res = await fetch("https://localhost:7151/api/auth/login", {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -15,5 +15,8 @@ backend/obj/
 
 # Общее
 .DS_Store
+.env
+.env.*
+!.env.example
 .env.local
 npm-debug.log*
