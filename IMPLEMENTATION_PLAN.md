@@ -125,7 +125,7 @@
 | Задача | Статус | Результат / файлы / проверки / вопросы |
 |---|---|---|
 | 0. Обследование проекта | Готово | Обследование текущего React/API/EF/SQL/Docker, карта пробелов и проверки сохранены ниже. |
-| 1. Учётные записи и рабочие пространства | Не начата | Решения по bootstrap и seeded-аккаунтам согласованы; реализацию можно начинать. Использовать закрытую однократную bootstrap-команду с секретом из окружения; удалить тестовые seeded-аккаунты, не перенося plaintext-пароли. Перед миграцией реальной БД сверить фактические данные и сохранить пользовательские записи. |
+| 1. Учётные записи и рабочие пространства | В работе | **Выполнено:** Реализована Clean Architecture с Core/Infrastructure/Presentation слоями. Созданы сущности UserEntity, SchoolEntity, TeacherEntity, StudentEntity, WorkspaceMembershipEntity с правильными связями. Реализована безопасная аутентификация (BCrypt), JWT с валидацией issuer/audience. AuthService и WorkspaceService с основной бизнес-логикой. AuthController с endpoints: /login, /register/student, /register/teacher. BootstrapController для одноразового создания школьного администратора с секретом из окружения. Repositories для всех сущностей. Migrate на .NET 10. CORS ограничен на localhost. **Файлы:** Core/Entities/*.cs, Core/Interfaces/*.cs, Infrastructure/Repositories/*.cs, Infrastructure/Services/*.cs, Presentation/Controllers/*.cs, Core/Use_Cases/Auth/*.cs. **Миграция:** InitializeCleanArchitecture. **Осталось:** API-тесты, проверка граничных случаев, frontend интеграция, инвайт преподавателя школой, подтверждение студента.  |
 | 2. Школа, ученики и курсы | Не начата | |
 | 3. Оплаты и два баланса | Не начата | |
 | 4. Календарь и повторения | Не начата | |
