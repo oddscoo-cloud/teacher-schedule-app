@@ -1,87 +1,106 @@
-# Getting Started with Create React App
+# Менеджер расписания школы
 
-## Run the full application with Docker
+Веб-приложение для просмотра и управления расписанием. Проект состоит из
+фронтенда на React, API на ASP.NET Core и базы данных SQL Server.
 
-From the repository root, copy `.env.example` to `.env`, then run:
+## Запуск всего проекта через Docker
+
+### Что понадобится
+
+- Docker Desktop с запущенным Docker Engine и поддержкой Linux-контейнеров.
+- PowerShell.
+
+### Первый запуск
+
+Откройте PowerShell в корне репозитория — в папке, где находится
+`docker-compose.yml`. Создайте локальный файл с настройками и запустите
+сервисы:
 
 ```powershell
 Copy-Item .env.example .env
 docker compose up --build
 ```
 
-Open the frontend at <http://localhost:3000>. The API and Swagger UI are at
-<http://localhost:5101> and <http://localhost:5101/swagger>. SQL Server data
-is stored in the `sql_data` Docker volume.
+Команда соберёт образы фронтенда и API, скачает образ SQL Server и запустит
+все три сервиса. При первом запуске это может занять несколько минут.
+Оставьте окно PowerShell открытым, пока работает приложение.
 
-The credentials in `.env.example` are for local development only. Change them
-before using this setup outside a trusted local machine. Stop the containers
-with `docker compose down`; this keeps the database volume.
+После запуска откройте:
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+- Приложение: <http://localhost:3000>
+- API: <http://localhost:5101>
+- Swagger для проверки API: <http://localhost:5101/swagger>
 
-## Available Scripts
+API применяет миграции базы данных при запуске. Данные SQL Server хранятся
+в Docker-томе `sql_data` и сохраняются после остановки контейнеров.
 
-In the project directory, you can run:
+### Остановка и повторный запуск
+
+Чтобы остановить приложение, нажмите `Ctrl+C` в окне с логами, затем из
+корня репозитория выполните:
+
+```powershell
+docker compose down
+```
+
+Эта команда удалит контейнеры, но сохранит данные базы. Чтобы снова запустить
+проект:
+
+```powershell
+docker compose up
+```
+
+Если менялся код API или конфигурация образов, пересоберите образы:
+
+```powershell
+docker compose up --build
+```
+
+Исходный код фронтенда подключён к контейнеру: изменения обычно отображаются
+после автоматической перезагрузки страницы.
+
+### Настройки и безопасность
+
+Файл `.env.example` содержит пароль SQL Server только для локальной разработки.
+При необходимости измените пароль в `.env` перед запуском. Не используйте
+примерный пароль вне локальной доверенной среды и не публикуйте `.env`.
+
+## Команды фронтенда без Docker
+
+Эти команды запускают только React-фронтенд. Для работы всего приложения
+отдельно также нужны запущенные API и SQL Server.
+
+Перейдите в папку `frontend` и установите зависимости:
+
+```powershell
+npm ci
+```
+
+Доступные команды:
 
 ### `npm start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Запускает фронтенд в режиме разработки по адресу
+<http://localhost:3000>. Страница перезагружается при изменении исходников.
 
 ### `npm test`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Запускает тесты в интерактивном режиме. Для однократного запуска в CI:
+
+```powershell
+npm test -- --watchAll=false
+```
 
 ### `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Создаёт оптимизированную production-сборку в папке `build`.
 
 ### `npm run eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Извлекает настройки Create React App в проект. Операция необратима; обычно
+для работы над приложением она не требуется.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Дополнительная информация
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- [Документация Create React App](https://facebook.github.io/create-react-app/docs/getting-started)
+- [Документация React](https://react.dev/learn)
