@@ -1,0 +1,119 @@
+.student-management {
+  max-width: 1080px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.student-page-header,
+.student-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.student-filters,
+.student-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.student-filter,
+.student-form label,
+.student-note-form label {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.student-filter input,
+.student-filter select,
+.student-form input,
+.student-form select,
+.student-note-form textarea {
+  min-width: 0;
+  padding: 0.55rem;
+}
+
+.student-table-wrap {
+  overflow-x: auto;
+}
+
+.student-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.student-table th,
+.student-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.student-primary-button,
+.student-form-actions button,
+.student-note-form button {
+  padding: 0.6rem 0.9rem;
+}
+
+.student-empty,
+.student-inline-warning {
+  padding: 1rem;
+  background: #f5f5f5;
+}
+
+.student-error {
+  color: #a32020;
+}
+
+.student-form-page .student-form {
+  max-width: 680px;
+}
+
+.student-contacts-form {
+  display: grid;
+  gap: 1rem;
+  grid-column: 1 / -1;
+}
+
+.student-contact-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+}
+
+.student-form select[multiple] {
+  min-height: 7rem;
+}
+
+.student-details {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.75rem 1.5rem;
+}
+
+.student-details dt {
+  font-weight: 600;
+}
+
+.student-notes ul {
+  padding: 0;
+  list-style: none;
+}
+
+.student-note {
+  margin: 0.75rem 0;
+  padding: 1rem;
+  border: 1px solid #ddd;
+}
+
+.student-note-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.student-note-form textarea {
+  min-height: 4rem;
+}
