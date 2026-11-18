@@ -20,3 +20,13 @@ backend/obj/
 !.env.example
 .env.local
 npm-debug.log*
+
+# Документация и промпты (внутренние файлы разработки)
+00_START_HERE.md
+INDEX.md
+README_PROMPTS.md
+PROMPTS_INDEX.md
+PROMPTS_SUMMARY.md
+PROMPTS_TASK_*.md
+EXAMPLE_PROMPT_REQUEST.md
+test_output.txt
