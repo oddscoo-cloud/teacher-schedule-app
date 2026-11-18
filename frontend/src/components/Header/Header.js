@@ -1,6 +1,33 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import "./HeaderStyles/HeaderStyle.css";
+
+const THEME_STORAGE_KEY = "teacher-schedule-theme";
+
+function ThemeToggle() {
+  const [theme, setTheme] = useState(() =>
+    window.localStorage.getItem(THEME_STORAGE_KEY) === "dark" ? "dark" : "light"
+  );
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
+
+  const nextTheme = theme === "dark" ? "light" : "dark";
+  return (
+    <button
+      className="app-theme-toggle"
+      type="button"
+      aria-label={`Включить ${nextTheme === "dark" ? "тёмную" : "светлую"} тему`}
+      aria-pressed={theme === "dark"}
+      title={`Включить ${nextTheme === "dark" ? "тёмную" : "светлую"} тему`}
+      onClick={() => setTheme(nextTheme)}
+    >
+      <span aria-hidden="true">{theme === "dark" ? "☼" : "☾"}</span>
+    </button>
+  );
+}
 
 function Header() {
   const location = useLocation();
@@ -58,6 +85,8 @@ function Header() {
             Войти
           </Link>
         ) : null}
+
+        <ThemeToggle />
 
         {isLoggedIn && (
           <button className="app-header-action app-signout" type="button" onClick={signOut}>

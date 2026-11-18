@@ -52,9 +52,9 @@
   width: 100%;
   min-height: 44px;
   padding: 10px 12px;
-  border: 1px solid #dcd9d0;
+  border: 1px solid var(--color-input-border);
   border-radius: 7px;
-  background: white;
+  background: var(--color-input-bg);
   color: var(--color-ink);
 }
 
@@ -66,10 +66,10 @@
 .login-button {
   min-height: 45px;
   margin-top: 12px;
-  border: 1px solid var(--color-ink);
+  border: 1px solid var(--color-action-bg);
   border-radius: 8px;
-  background: var(--color-ink);
-  color: white;
+  background: var(--color-action-bg);
+  color: var(--color-action-text);
   font-weight: 650;
   cursor: pointer;
   transition: background 140ms ease, border-color 140ms ease;
@@ -88,9 +88,9 @@
 .login-error {
   margin: 9px 0 0;
   padding: 11px 12px;
-  border: 1px solid #e7c7c1;
+  border: 1px solid var(--color-danger-border);
   border-radius: 7px;
-  background: #fff8f6;
+  background: var(--color-danger-surface);
   color: var(--color-danger);
   font-size: 13px;
 }

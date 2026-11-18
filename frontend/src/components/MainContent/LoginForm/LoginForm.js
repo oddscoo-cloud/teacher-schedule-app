@@ -14,7 +14,7 @@ const LoginForm = ({ onLogin }) => {
     setSubmitting(true);
     setError("");
     try {
-      const res = await fetch(`${API_BASE_URL}/auth/login`, {
+      const res = await fetch(`${API_BASE_URL}/legacy-auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

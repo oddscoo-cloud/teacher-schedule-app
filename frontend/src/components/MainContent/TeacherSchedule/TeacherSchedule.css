@@ -76,7 +76,7 @@
   height: 25px;
   place-items: center;
   border-radius: 50%;
-  background: #f3f0e5;
+  background: var(--color-soft-accent);
   color: var(--color-rust);
   font-size: 12px;
   font-weight: 700;
@@ -96,7 +96,7 @@
   padding: 11px 10px;
   border-left: 3px solid var(--color-gold);
   border-radius: 0 7px 7px 0;
-  background: #fbf8eb;
+  background: var(--color-accent-surface);
 }
 
 .lesson-card strong {
@@ -115,7 +115,7 @@
 
 .empty-day {
   margin: 18px 0 0;
-  color: #96938b;
+  color: var(--color-faint);
   font-size: 13px;
 }
 
@@ -130,8 +130,8 @@
 }
 
 .schedule-error {
-  border-color: #e7c7c1;
-  background: #fff8f6;
+  border-color: var(--color-danger-border);
+  background: var(--color-danger-surface);
   color: var(--color-danger);
 }
 

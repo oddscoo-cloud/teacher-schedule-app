@@ -9,7 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 
 [ApiController]
-[Route("api/auth")]
+[Route("api/legacy-auth")]
 public class AuthController : ControllerBase
 {
     private readonly AppDbContext _context;

@@ -3,7 +3,7 @@
   top: 0;
   z-index: 20;
   border-bottom: 1px solid var(--color-line);
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--color-header-bg);
 }
 
 .app-header-inner {
@@ -78,10 +78,10 @@
   align-items: center;
   justify-content: center;
   padding: 0 17px;
-  border: 1px solid var(--color-ink);
+  border: 1px solid var(--color-action-bg);
   border-radius: 8px;
-  background: var(--color-ink);
-  color: white;
+  background: var(--color-action-bg);
+  color: var(--color-action-text);
   font-size: 14px;
   font-weight: 650;
   text-decoration: none;
@@ -97,7 +97,7 @@
 
 .app-header-action-secondary {
   border-color: var(--color-line);
-  background: white;
+  background: var(--color-surface);
   color: var(--color-ink);
 }
 
@@ -109,14 +109,38 @@
 
 .app-signout {
   border-color: var(--color-line);
-  background: white;
+  background: var(--color-surface);
   color: var(--color-muted);
 }
 
 .app-signout:hover {
   border-color: var(--color-rust);
-  background: #fff8f4;
+  background: var(--color-rust-surface);
   color: var(--color-rust);
+}
+
+.app-theme-toggle {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--color-line);
+  border-radius: 9px;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+}
+
+.app-theme-toggle:hover {
+  border-color: var(--color-khaki);
+  background: var(--color-hover-surface);
+}
+
+.app-theme-toggle span {
+  font-size: 21px;
+  line-height: 1;
 }
 
 @media (max-width: 640px) {
@@ -150,5 +174,10 @@
   .app-header-action {
     min-height: 36px;
     padding: 0 12px;
+  }
+
+  .app-theme-toggle {
+    width: 36px;
+    height: 36px;
   }
 }

@@ -1,5 +1,5 @@
 const API_BASE_URL =
-  process.env.REACT_APP_API_URL || "https://localhost:7151/api";
+  process.env.REACT_APP_API_URL || "http://localhost:5101/api";
 
 const request = async (path, options = {}) => {
   const response = await fetch(`${API_BASE_URL}${path}`, {
