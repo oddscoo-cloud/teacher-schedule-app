@@ -44,11 +44,23 @@ public class StudentRepository : IStudentRepository
 
     public async Task<IEnumerable<StudentEntity>> GetByTeacherIdAsync(int teacherId)
     {
+        var teacher = await _context.TeacherEntities
+            .AsNoTracking()
+            .SingleOrDefaultAsync(item => item.Id == teacherId);
+        if (teacher == null)
+            return Array.Empty<StudentEntity>();
+
         return await _context.StudentEntities
             .Include(s => s.User)
             .Include(s => s.TeacherAssignments)
             .ThenInclude(sta => sta.Teacher)
-            .Where(s => s.TeacherAssignments.Any(ta => ta.TeacherId == teacherId))
+            .Where(student =>
+                teacher.SchoolId.HasValue
+                    ? student.SchoolId == teacher.SchoolId &&
+                      student.TeacherAssignments.Any(assignment => assignment.TeacherId == teacherId && assignment.IsSchool)
+                    : student.SchoolId == null &&
+                      student.StandaloneTeacherId == teacherId &&
+                      student.TeacherAssignments.Any(assignment => assignment.TeacherId == teacherId && !assignment.IsSchool))
             .ToListAsync();
     }
 

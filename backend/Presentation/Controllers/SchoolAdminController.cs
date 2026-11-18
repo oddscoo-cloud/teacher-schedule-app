@@ -78,7 +78,8 @@ public class SchoolAdminController : ControllerBase
             _studentRepository,
             _teacherRepository,
             _schoolRepository,
-            _userRepository);
+            _userRepository,
+            _membershipRepository);
 
         var (success, message) = await useCase.ExecuteAsync(
             request.StudentId,

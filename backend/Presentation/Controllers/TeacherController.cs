@@ -17,17 +17,20 @@ public class TeacherController : ControllerBase
     private readonly IStudentRepository _studentRepository;
     private readonly IUserRepository _userRepository;
     private readonly IWorkspaceMembershipRepository _membershipRepository;
+    private readonly IStudentService _studentService;
 
     public TeacherController(
         ITeacherRepository teacherRepository,
         IStudentRepository studentRepository,
         IUserRepository userRepository,
-        IWorkspaceMembershipRepository membershipRepository)
+        IWorkspaceMembershipRepository membershipRepository,
+        IStudentService studentService)
     {
         _teacherRepository = teacherRepository;
         _studentRepository = studentRepository;
         _userRepository = userRepository;
         _membershipRepository = membershipRepository;
+        _studentService = studentService;
     }
 
     [HttpPost("confirm-student")]
@@ -40,7 +43,16 @@ public class TeacherController : ControllerBase
         if (userId == null)
             return Unauthorized();
 
-        var teacher = await _teacherRepository.GetByUserIdAsync(userId.Value);
+        if (!int.TryParse(User.FindFirst("workspaceMembershipId")?.Value, out var membershipId))
+            return Unauthorized();
+
+        var membership = await _membershipRepository.GetByIdAsync(membershipId);
+        if (membership == null ||
+            membership.UserId != userId.Value ||
+            membership.WorkspaceType != WorkspaceType.Standalone)
+            return Forbid();
+
+        var teacher = await _teacherRepository.GetByUserIdAndSchoolIdAsync(userId.Value, null);
         if (teacher == null)
             return Unauthorized(new { success = false, message = "User is not a teacher" });
 
@@ -52,7 +64,8 @@ public class TeacherController : ControllerBase
             _studentRepository,
             _teacherRepository,
             null!, // schoolRepository - not used for standalone
-            _userRepository);
+            _userRepository,
+            _membershipRepository);
 
         var (success, message) = await useCase.ExecuteAsync(
             request.StudentId,
@@ -72,11 +85,18 @@ public class TeacherController : ControllerBase
         if (userId == null)
             return Unauthorized();
 
-        var teacher = await _teacherRepository.GetByUserIdAsync(userId.Value);
-        if (teacher == null)
+        if (!int.TryParse(User.FindFirst("workspaceMembershipId")?.Value, out var membershipId))
             return Unauthorized();
 
-        var students = await _studentRepository.GetByTeacherIdAsync(teacher.Id);
+        var students = await _studentService.GetStudentsAsync(
+            userId.Value,
+            UserRole.Teacher,
+            membershipId,
+            null,
+            null,
+            null);
+        if (students == null)
+            return Forbid();
 
         var result = students.Select(s => new
         {
@@ -86,7 +106,6 @@ public class TeacherController : ControllerBase
             email = s.Email ?? s.User?.Email,
             status = s.Status.ToString(),
             phoneNumber = s.PhoneNumber,
-            isStandalone = s.StandaloneTeacherId == teacher.Id
         });
 
         return Ok(result);

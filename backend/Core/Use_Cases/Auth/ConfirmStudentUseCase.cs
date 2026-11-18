@@ -9,17 +9,20 @@ public class ConfirmStudentUseCase
     private readonly ITeacherRepository _teacherRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IWorkspaceMembershipRepository _membershipRepository;
 
     public ConfirmStudentUseCase(
         IStudentRepository studentRepository,
         ITeacherRepository teacherRepository,
         ISchoolRepository schoolRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        IWorkspaceMembershipRepository membershipRepository)
     {
         _studentRepository = studentRepository;
         _teacherRepository = teacherRepository;
         _schoolRepository = schoolRepository;
         _userRepository = userRepository;
+        _membershipRepository = membershipRepository;
     }
 
     public async Task<(bool success, string message)> ExecuteAsync(
@@ -33,6 +36,10 @@ public class ConfirmStudentUseCase
 
         if (schoolId.HasValue)
         {
+            if (student.SchoolId.HasValue && student.SchoolId != schoolId ||
+                student.StandaloneTeacherId.HasValue && !student.SchoolId.HasValue)
+                return (false, "Student belongs to another workspace");
+
             var school = await _schoolRepository.GetByIdAsync(schoolId.Value);
             if (school == null)
                 return (false, "School not found");
@@ -46,6 +53,30 @@ public class ConfirmStudentUseCase
             if (teacher == null)
                 return (false, "Teacher not found");
 
+            if (schoolId.HasValue)
+            {
+                if (teacher.SchoolId != schoolId)
+                    return (false, "Teacher does not belong to this school");
+
+                var teacherMembership = await _membershipRepository.GetUserSchoolMembershipAsync(
+                    teacher.UserId,
+                    schoolId.Value);
+                if (teacherMembership == null)
+                    return (false, "Teacher is not a member of this school");
+            }
+            else if (teacher.SchoolId.HasValue ||
+                     !(await _membershipRepository.GetByUserIdAsync(teacher.UserId))
+                         .Any(membership => membership.WorkspaceType == WorkspaceType.Standalone))
+            {
+                return (false, "Teacher is not a member of this standalone workspace");
+            }
+
+            if (!schoolId.HasValue &&
+                (student.TeacherAssignments.Any(assignment => assignment.IsSchool) ||
+                 student.TeacherAssignments.Any(assignment => !assignment.IsSchool && assignment.TeacherId != teacherId) ||
+                 student.StandaloneTeacherId.HasValue && student.StandaloneTeacherId != teacherId))
+                return (false, "Student belongs to another workspace");
+
             // Check if assignment already exists
             var existingAssignment = student.TeacherAssignments
                 .FirstOrDefault(ta => ta.TeacherId == teacherId.Value);
@@ -56,7 +87,8 @@ public class ConfirmStudentUseCase
                 {
                     StudentId = studentId,
                     TeacherId = teacherId.Value,
-                    IsSchool = schoolId.HasValue
+                    IsSchool = schoolId.HasValue,
+                    AssignedAt = DateTime.UtcNow
                 };
                 student.TeacherAssignments.Add(assignment);
             }

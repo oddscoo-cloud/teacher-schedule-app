@@ -216,6 +216,12 @@ namespace backend.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql(
+                """
+                IF EXISTS (SELECT 1 FROM StudentEntities WHERE UserId IS NULL)
+                    THROW 51000, 'Cannot downgrade student management while students without accounts exist.', 1;
+                """);
+
             migrationBuilder.DropTable(
                 name: "StudentContacts");
 
@@ -256,7 +262,6 @@ namespace backend.Migrations
                 table: "StudentEntities",
                 type: "int",
                 nullable: false,
-                defaultValue: 0,
                 oldClrType: typeof(int),
                 oldType: "int",
                 oldNullable: true);
