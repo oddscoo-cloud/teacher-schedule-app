@@ -17,6 +17,7 @@ public class StudentRepository : IStudentRepository
     public async Task<StudentEntity?> GetByIdAsync(int id)
     {
         return await _context.StudentEntities
+            .Include(s => s.User)
             .Include(s => s.TeacherAssignments)
             .ThenInclude(sta => sta.Teacher)
             .FirstOrDefaultAsync(s => s.Id == id);
@@ -25,6 +26,7 @@ public class StudentRepository : IStudentRepository
     public async Task<StudentEntity?> GetByUserIdAsync(int userId)
     {
         return await _context.StudentEntities
+            .Include(s => s.User)
             .Include(s => s.TeacherAssignments)
             .ThenInclude(sta => sta.Teacher)
             .FirstOrDefaultAsync(s => s.UserId == userId);
@@ -33,6 +35,7 @@ public class StudentRepository : IStudentRepository
     public async Task<IEnumerable<StudentEntity>> GetBySchoolIdAsync(int schoolId)
     {
         return await _context.StudentEntities
+            .Include(s => s.User)
             .Include(s => s.TeacherAssignments)
             .ThenInclude(sta => sta.Teacher)
             .Where(s => s.SchoolId == schoolId)
@@ -42,6 +45,7 @@ public class StudentRepository : IStudentRepository
     public async Task<IEnumerable<StudentEntity>> GetByTeacherIdAsync(int teacherId)
     {
         return await _context.StudentEntities
+            .Include(s => s.User)
             .Include(s => s.TeacherAssignments)
             .ThenInclude(sta => sta.Teacher)
             .Where(s => s.TeacherAssignments.Any(ta => ta.TeacherId == teacherId))

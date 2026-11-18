@@ -52,10 +52,11 @@ public class ConfirmStudentUseCase
 
             if (existingAssignment == null)
             {
-                var assignment = new StudentTeacherAssignmentEntity
+                var assignment = new StudentAssignmentEntity
                 {
                     StudentId = studentId,
-                    TeacherId = teacherId.Value
+                    TeacherId = teacherId.Value,
+                    IsSchool = schoolId.HasValue
                 };
                 student.TeacherAssignments.Add(assignment);
             }
@@ -69,7 +70,9 @@ public class ConfirmStudentUseCase
 
         // Activate student account
         student.Status = AccountStatus.Active;
-        var studentUser = await _userRepository.GetByIdAsync(student.UserId);
+        var studentUser = student.UserId.HasValue
+            ? await _userRepository.GetByIdAsync(student.UserId.Value)
+            : null;
         if (studentUser != null)
         {
             studentUser.Status = AccountStatus.Active;

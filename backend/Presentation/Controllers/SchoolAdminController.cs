@@ -105,7 +105,7 @@ public class SchoolAdminController : ControllerBase
             id = s.Id,
             firstName = s.FirstName,
             lastName = s.LastName,
-            email = s.User.Email,
+            email = s.Email ?? s.User?.Email,
             status = s.Status.ToString(),
             phoneNumber = s.PhoneNumber,
             teachers = s.TeacherAssignments.Select(ta => new { id = ta.TeacherId, name = ta.Teacher.FirstName + " " + ta.Teacher.LastName })

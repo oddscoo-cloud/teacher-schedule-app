@@ -83,7 +83,7 @@ public class TeacherController : ControllerBase
             id = s.Id,
             firstName = s.FirstName,
             lastName = s.LastName,
-            email = s.User.Email,
+            email = s.Email ?? s.User?.Email,
             status = s.Status.ToString(),
             phoneNumber = s.PhoneNumber,
             isStandalone = s.StandaloneTeacherId == teacher.Id

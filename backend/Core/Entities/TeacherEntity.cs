@@ -14,6 +14,6 @@ public class TeacherEntity
     // Связи
     public UserEntity User { get; set; } = null!;
     public SchoolEntity? School { get; set; }
-    public ICollection<StudentTeacherAssignmentEntity> StudentAssignments { get; set; } = new List<StudentTeacherAssignmentEntity>();
+    public ICollection<StudentAssignmentEntity> StudentAssignments { get; set; } = new List<StudentAssignmentEntity>();
     public ICollection<StudentEntity> StandaloneStudents { get; set; } = new List<StudentEntity>();
 }

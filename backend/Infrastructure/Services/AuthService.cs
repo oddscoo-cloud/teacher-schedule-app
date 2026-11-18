@@ -73,6 +73,7 @@ public class AuthService : IAuthService
             UserId = user.Id,
             FirstName = firstName,
             LastName = lastName,
+            Email = email,
             Status = AccountStatus.Pending
         };
 
@@ -196,10 +197,11 @@ public class AuthService : IAuthService
             if (teacher == null)
                 return (false, "Teacher not found");
 
-            var assignment = new StudentTeacherAssignmentEntity
+            var assignment = new StudentAssignmentEntity
             {
                 StudentId = studentId,
-                TeacherId = teacherId.Value
+                TeacherId = teacherId.Value,
+                IsSchool = schoolId.HasValue
             };
 
             student.TeacherAssignments.Add(assignment);
