@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import "./TeacherSchedule.css";
-import Header from "../../Header/Header";
 import API_BASE_URL from "../../../api";
 
 const daysOfWeek = ["Пн", "Вт", "Ср", "Чт", "Пт"];
@@ -8,70 +7,99 @@ const daysOfWeek = ["Пн", "Вт", "Ср", "Чт", "Пт"];
 const TeacherSchedule = () => {
   const [teacher, setTeacher] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  const teacherId = Number(localStorage.getItem("teacherId"));
+  const [error, setError] = useState("");
+  const teacherId = localStorage.getItem("teacherId");
 
   useEffect(() => {
+    let active = true;
+    if (!teacherId) {
+      setError("Не удалось определить учётную запись учителя. Войдите в систему ещё раз.");
+      setLoading(false);
+      return () => {
+        active = false;
+      };
+    }
+
     const fetchTeacher = async () => {
       try {
-        const res = await fetch(
-          `${API_BASE_URL}/teachers/${teacherId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
+        const response = await fetch(`${API_BASE_URL}/teachers/${teacherId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+          },
+        });
 
-        if (!res.ok) throw new Error("Failed to load teacher");
-
-        const data = await res.json();
-        setTeacher(data);
-      } catch (err) {
-        console.error(err);
+        if (!response.ok) throw new Error("Не удалось загрузить расписание.");
+        const data = await response.json();
+        if (active) {
+          setTeacher(data);
+          setError("");
+        }
+      } catch (requestError) {
+        if (active) setError(requestError.message);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
-    if (teacherId) fetchTeacher();
+    fetchTeacher();
+    return () => {
+      active = false;
+    };
   }, [teacherId]);
 
-  if (loading) return <p>Загрузка...</p>;
-  if (!teacher) return <p>Учитель не найден</p>;
+  if (loading) {
+    return <main className="schedule-page"><p className="schedule-message">Загружаем расписание…</p></main>;
+  }
+  if (error) {
+    return <main className="schedule-page"><p className="schedule-message schedule-error" role="alert">{error}</p></main>;
+  }
+  if (!teacher) {
+    return <main className="schedule-page"><p className="schedule-message">Данные учителя не найдены.</p></main>;
+  }
+
+  const lessonsCount = (teacher.lessons || []).length;
 
   return (
-    <div className="teacher-schedule">
-      
-      <h2>Моё расписание: {teacher.name}</h2>
+    <main className="schedule-page">
+      <header className="schedule-heading">
+        <div>
+          <p className="schedule-eyebrow">Рабочая неделя</p>
+          <h1>Расписание</h1>
+          <p className="schedule-subtitle">
+            {teacher.name} <span aria-hidden="true">·</span> {lessonsCount} {lessonsCount === 1 ? "урок" : "уроков"} на неделе
+          </p>
+        </div>
+      </header>
 
-      <div className="week-grid">
+      <section className="week-grid" aria-label="Расписание на неделю">
         {daysOfWeek.map((day) => {
-          const lessons = (teacher.lessons || []).filter(
-            (s) => s.day === day
-          );
+          const lessons = (teacher.lessons || [])
+            .filter((lesson) => lesson.day === day)
+            .sort((first, second) => first.start.localeCompare(second.start));
 
           return (
-            <div key={day} className="day-column">
-              <h3>{day}</h3>
-
+            <section key={day} className="day-column" aria-label={`${day}, ${lessons.length} уроков`}>
+              <div className="day-heading">
+                <h2>{day}</h2>
+                <span className="day-count">{lessons.length}</span>
+              </div>
               {lessons.length === 0 ? (
-                <p className="empty">Нет уроков</p>
+                <p className="empty-day">Свободный день</p>
               ) : (
-                lessons.map((lesson) => (
-                  <div key={lesson.id} className="lesson-card">
-                    <strong>{lesson.lessonName}</strong>
-                    <div>
-                      {lesson.start} - {lesson.end}
-                    </div>
-                  </div>
-                ))
+                <ul className="day-lessons">
+                  {lessons.map((lesson) => (
+                    <li key={lesson.id} className="lesson-card">
+                      <span className="lesson-time">{lesson.start}–{lesson.end}</span>
+                      <strong>{lesson.lessonName}</strong>
+                    </li>
+                  ))}
+                </ul>
               )}
-            </div>
+            </section>
           );
         })}
-      </div>
-    </div>
+      </section>
+    </main>
   );
 };
 

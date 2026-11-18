@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import "./App.css";
 import AboutUs from "./components/About us/AboutUs";
 import LoginForm from "../src/components/MainContent/LoginForm/LoginForm";
 import AdminSchedule from "./components/MainContent/AdminSchedule/AdminSchedule";
@@ -12,7 +13,7 @@ import SchoolCourses from "./components/Students/SchoolCourses";
 
 function App() {
   return (
-    <>
+    <div className="app-shell">
       <Header />
       <Routes>
         <Route path="/" element={<AboutUs />} />
@@ -110,7 +111,7 @@ function App() {
           }
         />
       </Routes>
-    </>
+    </div>
   );
 }
 

@@ -32,8 +32,11 @@ const StudentCard = ({ admin = false }) => {
   return (
     <main className="student-management">
       <header className="student-page-header">
-        <h1>{[student.lastName, student.firstName, student.patronymic].filter(Boolean).join(" ")}</h1>
-        <Link to={`${basePath}/${id}/edit`}>Редактировать</Link>
+        <div>
+          <Link className="student-back-link" to={basePath}>← К списку учеников</Link>
+          <h1>{[student.lastName, student.firstName, student.patronymic].filter(Boolean).join(" ")}</h1>
+        </div>
+        <Link className="student-primary-button" to={`${basePath}/${id}/edit`}>Редактировать</Link>
       </header>
       <dl className="student-details">
         <dt>Email</dt><dd>{student.email || "—"}</dd>
@@ -43,13 +46,13 @@ const StudentCard = ({ admin = false }) => {
         <dt>Статус</dt><dd>{student.status}</dd>
       </dl>
 
-      <section>
+      <section className="student-info-section">
         <h2>Курсы</h2>
         {student.courses.length ? (
           <ul>{student.courses.map((course) => <li key={course.id}>{course.name}</li>)}</ul>
         ) : <p>Курсы не назначены.</p>}
       </section>
-      <section>
+      <section className="student-info-section">
         <h2>Родители и опекуны</h2>
         {student.contacts.length ? (
           <ul>

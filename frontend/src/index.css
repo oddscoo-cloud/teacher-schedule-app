@@ -1,21 +1,69 @@
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
-
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Montserrat', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #120223 0%, #1a032f 100%);
-  min-height: 100vh;
-  color: white;
+:root {
+  --color-gold: #deb308;
+  --color-ink: #242423;
+  --color-khaki: #a59257;
+  --color-copper: #bb794c;
+  --color-rust: #854d34;
+  --color-paper: #f7f6f2;
+  --color-surface: #ffffff;
+  --color-muted: #716f67;
+  --color-line: #e7e4dc;
+  --color-danger: #a33b32;
+  --shadow-card: 0 8px 24px rgba(36, 36, 35, 0.06);
 }
 
 * {
   box-sizing: border-box;
 }
 
-/* Typography defaults */
-h1, h2, h3, h4, h5, h6, p, label, span, div {
-  color: white;
+html {
+  min-width: 320px;
+  background: var(--color-paper);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: "Segoe UI", "Arial", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: var(--color-rust);
+}
+
+button {
+  color: inherit;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(222, 179, 8, 0.55);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgba(222, 179, 8, 0.28);
 }

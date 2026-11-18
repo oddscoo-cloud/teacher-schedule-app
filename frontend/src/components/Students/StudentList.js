@@ -8,6 +8,7 @@ const StudentList = ({ admin = false }) => {
   const [students, setStudents] = useState([]);
   const [courses, setCourses] = useState([]);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
   const [course, setCourse] = useState("");
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
@@ -15,9 +16,14 @@ const StudentList = ({ admin = false }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearch(search), 250);
+    return () => window.clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
     let active = true;
     setLoading(true);
-    fetchStudents({ search, course, status })
+    fetchStudents({ search: debouncedSearch, course, status })
       .then((data) => {
         if (active) {
           setStudents(data);
@@ -33,7 +39,7 @@ const StudentList = ({ admin = false }) => {
     return () => {
       active = false;
     };
-  }, [search, course, status]);
+  }, [debouncedSearch, course, status]);
 
   useEffect(() => {
     let active = true;
@@ -52,6 +58,11 @@ const StudentList = ({ admin = false }) => {
   const newStudentPath = admin
     ? "/admin/school/students/new"
     : "/teacher/students/new";
+  const statusLabels = {
+    Active: "Активный",
+    Pending: "Ожидает подтверждения",
+    Disabled: "Отключён",
+  };
 
   return (
     <main className="student-management">
@@ -88,7 +99,9 @@ const StudentList = ({ admin = false }) => {
       {error && <p role="alert" className="student-error">{error}</p>}
       {loading && <p>Загрузка учеников...</p>}
       {!loading && !error && students.length === 0 && (
-        <p className="student-empty">Ученики не найдены.</p>
+        <p className="student-empty">
+          Ученики не найдены. Измените условия поиска или добавьте нового ученика.
+        </p>
       )}
       {!loading && students.length > 0 && (
         <div className="student-table-wrap">
@@ -113,7 +126,11 @@ const StudentList = ({ admin = false }) => {
                   </td>
                   <td>{student.email || "—"}</td>
                   <td>{student.phoneNumber || "—"}</td>
-                  <td>{student.status}</td>
+                  <td>
+                    <span className={`student-status student-status-${student.status?.toLowerCase() || "default"}`}>
+                      {statusLabels[student.status] || student.status || "Не указан"}
+                    </span>
+                  </td>
                 </tr>
               ))}
             </tbody>
