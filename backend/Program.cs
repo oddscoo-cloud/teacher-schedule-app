@@ -63,6 +63,11 @@ builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 // Dependency Injection - Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IWorkspaceService, WorkspaceService>();
+builder.Services.AddScoped<StudentWorkspaceAccessService>();
+builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<IStudentAssignmentService, StudentAssignmentService>();
+builder.Services.AddScoped<IStudentNoteService, StudentNoteService>();
 
 var app = builder.Build();
 
@@ -84,7 +89,10 @@ app.MapControllers();
 await using (var scope = app.Services.CreateAsyncScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await db.Database.MigrateAsync();
+    if (db.Database.IsRelational())
+        await db.Database.MigrateAsync();
 }
 
 app.Run();
+
+public partial class Program { }

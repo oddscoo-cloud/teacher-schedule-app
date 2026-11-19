@@ -8,7 +8,11 @@ const ProtectedRoute = ({ children, role }) => {
     return <Navigate to="/login" />;
   }
 
-  if (role && userRole !== role.toLowerCase()) {
+  const expectedRole = role?.toLowerCase();
+  const isSchoolAdmin =
+    expectedRole === "schooladmin" && ["schooladmin", "admin"].includes(userRole);
+
+  if (role && userRole !== expectedRole && !isSchoolAdmin) {
     return <Navigate to="/login" />;
   }
 

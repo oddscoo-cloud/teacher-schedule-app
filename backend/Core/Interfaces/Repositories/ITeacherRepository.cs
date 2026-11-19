@@ -6,6 +6,7 @@ public interface ITeacherRepository
 {
     Task<TeacherEntity?> GetByIdAsync(int id);
     Task<TeacherEntity?> GetByUserIdAsync(int userId);
+    Task<TeacherEntity?> GetByUserIdAndSchoolIdAsync(int userId, int? schoolId);
     Task<IEnumerable<TeacherEntity>> GetBySchoolIdAsync(int schoolId);
     Task<TeacherEntity> CreateAsync(TeacherEntity teacher);
     Task<TeacherEntity> UpdateAsync(TeacherEntity teacher);

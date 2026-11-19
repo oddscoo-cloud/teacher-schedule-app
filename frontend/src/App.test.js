@@ -1,8 +1,14 @@
-import { render, screen } from '@testing-library/react';
-import App from './App';
+import { render, screen } from "@testing-library/react";
+import CourseFilter from "./components/Students/CourseFilter";
 
-test('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+test("shows all available courses in the course filter", () => {
+  render(
+    <CourseFilter
+      courses={[{ id: 3, name: "Mathematics" }]}
+      value=""
+      onChange={() => {}}
+    />
+  );
+
+  expect(screen.getByRole("option", { name: "Mathematics" })).toBeInTheDocument();
 });

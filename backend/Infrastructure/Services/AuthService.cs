@@ -73,6 +73,7 @@ public class AuthService : IAuthService
             UserId = user.Id,
             FirstName = firstName,
             LastName = lastName,
+            Email = email,
             Status = AccountStatus.Pending
         };
 
@@ -182,6 +183,10 @@ public class AuthService : IAuthService
 
         if (schoolId.HasValue)
         {
+            if (student.SchoolId.HasValue && student.SchoolId != schoolId ||
+                student.StandaloneTeacherId.HasValue && !student.SchoolId.HasValue)
+                return (false, "Student belongs to another workspace");
+
             var school = await _schoolRepository.GetByIdAsync(schoolId.Value);
             if (school == null)
                 return (false, "School not found");
@@ -196,13 +201,44 @@ public class AuthService : IAuthService
             if (teacher == null)
                 return (false, "Teacher not found");
 
-            var assignment = new StudentTeacherAssignmentEntity
+            if (schoolId.HasValue)
             {
-                StudentId = studentId,
-                TeacherId = teacherId.Value
-            };
+                if (teacher.SchoolId != schoolId)
+                    return (false, "Teacher does not belong to this school");
 
-            student.TeacherAssignments.Add(assignment);
+                if (await _workspaceMembershipRepository.GetUserSchoolMembershipAsync(
+                        teacher.UserId,
+                        schoolId.Value) == null)
+                    return (false, "Teacher is not a member of this school");
+            }
+            else if (teacher.SchoolId.HasValue ||
+                     !(await _workspaceMembershipRepository.GetByUserIdAsync(teacher.UserId))
+                         .Any(membership => membership.WorkspaceType == WorkspaceType.Standalone))
+            {
+                return (false, "Teacher is not a member of this standalone workspace");
+            }
+
+            if (!schoolId.HasValue &&
+                (student.TeacherAssignments.Any(assignment => assignment.IsSchool) ||
+                 student.TeacherAssignments.Any(assignment => !assignment.IsSchool && assignment.TeacherId != teacherId) ||
+                 student.StandaloneTeacherId.HasValue && student.StandaloneTeacherId != teacherId))
+                return (false, "Student belongs to another workspace");
+
+            var assignmentExists = student.TeacherAssignments.Any(assignment =>
+                assignment.TeacherId == teacherId.Value && assignment.IsSchool == schoolId.HasValue);
+            if (!assignmentExists)
+            {
+                student.TeacherAssignments.Add(new StudentAssignmentEntity
+                {
+                    StudentId = studentId,
+                    TeacherId = teacherId.Value,
+                    IsSchool = schoolId.HasValue,
+                    AssignedAt = DateTime.UtcNow
+                });
+            }
+
+            if (!schoolId.HasValue)
+                student.StandaloneTeacherId = teacherId.Value;
         }
 
         student.Status = AccountStatus.Active;

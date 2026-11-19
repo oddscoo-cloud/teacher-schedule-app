@@ -23,7 +23,11 @@ namespace backend.Data
         public DbSet<WorkspaceMembershipEntity> WorkspaceMemberships { get; set; }
         public DbSet<TeacherEntity> TeacherEntities { get; set; }
         public DbSet<StudentEntity> StudentEntities { get; set; }
-        public DbSet<StudentTeacherAssignmentEntity> StudentTeacherAssignments { get; set; }
+        public DbSet<StudentAssignmentEntity> StudentAssignments { get; set; }
+        public DbSet<ContactEntity> Contacts { get; set; }
+        public DbSet<StudentContactEntity> StudentContacts { get; set; }
+        public DbSet<CourseEntity> Courses { get; set; }
+        public DbSet<StudentNoteEntity> StudentNotes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -68,7 +72,10 @@ namespace backend.Data
             ConfigureWorkspaceMembershipEntity(modelBuilder);
             ConfigureTeacherEntity(modelBuilder);
             ConfigureStudentEntity(modelBuilder);
-            ConfigureStudentTeacherAssignmentEntity(modelBuilder);
+            ConfigureStudentAssignmentEntity(modelBuilder);
+            ConfigureContactEntities(modelBuilder);
+            ConfigureCourseEntity(modelBuilder);
+            ConfigureStudentNoteEntity(modelBuilder);
         }
 
         private void ConfigureUserEntity(ModelBuilder modelBuilder)
@@ -155,6 +162,8 @@ namespace backend.Data
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.FirstName).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.LastName).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.Patronymic).HasMaxLength(255);
+                entity.Property(e => e.Email).HasMaxLength(255);
                 entity.HasOne(e => e.User)
                     .WithMany()
                     .HasForeignKey(e => e.UserId)
@@ -171,14 +180,17 @@ namespace backend.Data
                     .WithOne(sa => sa.Student)
                     .HasForeignKey(sa => sa.StudentId)
                     .OnDelete(DeleteBehavior.Cascade);
+                entity.HasIndex(e => e.Email);
+                entity.HasIndex(e => e.SchoolId);
             });
         }
 
-        private void ConfigureStudentTeacherAssignmentEntity(ModelBuilder modelBuilder)
+        private void ConfigureStudentAssignmentEntity(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<StudentTeacherAssignmentEntity>(entity =>
+            modelBuilder.Entity<StudentAssignmentEntity>(entity =>
             {
                 entity.HasKey(e => e.Id);
+                entity.ToTable("StudentTeacherAssignments");
                 entity.HasOne(e => e.Student)
                     .WithMany(s => s.TeacherAssignments)
                     .HasForeignKey(e => e.StudentId)
@@ -187,7 +199,81 @@ namespace backend.Data
                     .WithMany(t => t.StudentAssignments)
                     .HasForeignKey(e => e.TeacherId)
                     .OnDelete(DeleteBehavior.Cascade);
+                entity.Property(e => e.IsSchool).HasDefaultValue(false);
                 entity.HasIndex(e => new { e.StudentId, e.TeacherId }).IsUnique();
+                entity.HasIndex(e => e.TeacherId);
+            });
+        }
+
+        private void ConfigureContactEntities(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ContactEntity>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.FirstName).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.LastName).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.Email).HasMaxLength(255);
+                entity.Property(e => e.PhoneNumber).HasMaxLength(50);
+            });
+
+            modelBuilder.Entity<StudentContactEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.StudentId, e.ContactId });
+                entity.Property(e => e.Relationship).HasMaxLength(100);
+                entity.HasOne(e => e.Student)
+                    .WithMany(s => s.Contacts)
+                    .HasForeignKey(e => e.StudentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.Contact)
+                    .WithMany(c => c.Students)
+                    .HasForeignKey(e => e.ContactId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+        }
+
+        private void ConfigureCourseEntity(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<CourseEntity>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
+                entity.HasOne(e => e.School)
+                    .WithMany()
+                    .HasForeignKey(e => e.SchoolId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasIndex(e => new { e.SchoolId, e.Name }).IsUnique();
+            });
+
+            modelBuilder.Entity<StudentCourseAssignmentEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.StudentId, e.CourseId });
+                entity.HasOne(e => e.Student)
+                    .WithMany(s => s.CourseAssignments)
+                    .HasForeignKey(e => e.StudentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.Course)
+                    .WithMany(c => c.Students)
+                    .HasForeignKey(e => e.CourseId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasIndex(e => e.CourseId);
+            });
+        }
+
+        private void ConfigureStudentNoteEntity(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<StudentNoteEntity>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Content).IsRequired();
+                entity.HasOne(e => e.Student)
+                    .WithMany(s => s.Notes)
+                    .HasForeignKey(e => e.StudentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.Teacher)
+                    .WithMany()
+                    .HasForeignKey(e => e.TeacherId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasIndex(e => new { e.StudentId, e.TeacherId });
             });
         }
     }

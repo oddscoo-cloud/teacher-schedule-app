@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import "../AdminSchedule/Styles/AdminSchedule.css";
-import Header from "../../Header/Header";
 import API_BASE_URL from "../../../api";
 
 const daysOfWeek = ["Пн", "Вт", "Ср", "Чт", "Пт"];
@@ -9,6 +8,8 @@ const AdminSchedule = () => {
   const [teacherData, setTeacherData] = useState([]);
   const [selectedTeacherId, setSelectedTeacherId] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [form, setForm] = useState({
     day: "Пн",
@@ -18,13 +19,22 @@ const AdminSchedule = () => {
   });
 
   const fetchTeachers = async () => {
-    const res = await fetch(`${API_BASE_URL}/teachers`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
-    const data = await res.json();
-    setTeacherData(data);
+    try {
+      const res = await fetch(`${API_BASE_URL}/teachers`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+        },
+      });
+      if (!res.ok) throw new Error("Не удалось загрузить список учителей.");
+      const data = await res.json();
+      setTeacherData(data);
+      setSelectedTeacherId((currentId) => currentId || data[0]?.id || null);
+      setError("");
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -39,14 +49,14 @@ const AdminSchedule = () => {
     if (!selectedTeacherId) return;
 
     if (!form.lessonName || !form.start || !form.end) {
-      alert("Заповніть усі поля");
+      setError("Заполните предмет и время начала и окончания.");
       return;
     }
 
     // Валідація формату часу
     const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
     if (!timeRegex.test(form.start) || !timeRegex.test(form.end)) {
-      alert("Неправильний формат часу. Використовуйте HH:MM (наприклад, 09:00)");
+      setError("Укажите время в формате ЧЧ:ММ, например 09:00.");
       return;
     }
 
@@ -57,7 +67,7 @@ const AdminSchedule = () => {
     const endTotalMin = endHour * 60 + endMin;
 
     if (startTotalMin >= endTotalMin) {
-      alert("Час початку повинен бути раніше часу завершення");
+      setError("Время начала должно быть раньше времени окончания.");
       return;
     }
 
@@ -79,129 +89,136 @@ const AdminSchedule = () => {
     });
 
     if (hasConflict) {
-      alert("Час перетинається з існуючим уроком цього дня");
+      setError("Это время пересекается с другим уроком в выбранный день.");
       return;
     }
 
-    await fetch(
-      `${API_BASE_URL}/teachers/${selectedTeacherId}/lesson`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+    setError("");
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/teachers/${selectedTeacherId}/lesson`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+          },
+          body: JSON.stringify({
+            day: form.day,
+            start: form.start,
+            end: form.end,
+            lessonName: form.lessonName,
+          }),
         },
-        body: JSON.stringify({
-          day: form.day,
-          start: form.start,
-          end: form.end,
-          lessonName: form.lessonName,
-        }),
-      }
-    );
+      );
+      if (!response.ok) throw new Error("Не удалось добавить урок. Проверьте данные и попробуйте ещё раз.");
 
-    await fetchTeachers();
-
-    setForm({
-      day: "Пн",
-      start: "",
-      end: "",
-      lessonName: "",
-    });
+      await fetchTeachers();
+      setForm({
+        day: "Пн",
+        start: "",
+        end: "",
+        lessonName: "",
+      });
+    } catch (requestError) {
+      setError(requestError.message);
+    }
   };
 
   const deleteLesson = async (lessonId) => {
-    await fetch(
-      `${API_BASE_URL}/teachers/${selectedTeacherId}/lesson/${lessonId}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/teachers/${selectedTeacherId}/lesson/${lessonId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+          },
+        }
+      );
+      if (!response.ok) throw new Error("Не удалось удалить урок. Попробуйте ещё раз.");
 
-    await fetchTeachers();
+      await fetchTeachers();
+    } catch (requestError) {
+      setError(requestError.message);
+    }
   };
 
   return (
     
-    <div className="admin-container">
-      {/* SIDEBAR */}
+    <main className="admin-container">
       <div className="sidebar">
-        <h3>Вчителі</h3>
+        <h3>Учителя</h3>
         <ul>
           {teacherData.map((t) => (
             <li
               key={t.id}
-              className={selectedTeacherId === t.id ? "active" : ""}
-              onClick={() => setSelectedTeacherId(t.id)}
             >
-              {t.name}
+              <button
+                type="button"
+                className={selectedTeacherId === t.id ? "active" : ""}
+                aria-pressed={selectedTeacherId === t.id}
+                onClick={() => setSelectedTeacherId(t.id)}
+              >
+                {t.name}
+              </button>
             </li>
           ))}
         </ul>
       </div>
 
-      {/* КОНТЕНТ */}
       <div className="content">
+        {loading && <p className="admin-message">Загружаем расписание…</p>}
+        {error && <p className="admin-message admin-error" role="alert">{error}</p>}
         {selectedTeacher ? (
           <>
-            <h2>{selectedTeacher.name}</h2>
+            <header className="admin-heading">
+              <div>
+                <h1>Расписание</h1>
+                <p>{selectedTeacher.name}</p>
+              </div>
+              <button className="toggle-form-button" onClick={() => setShowForm(!showForm)}>
+                {showForm ? "Закрыть форму" : "Добавить урок"}
+              </button>
+            </header>
 
-            <button className="toggle-form-button" onClick={() => setShowForm(!showForm)}>
-              Додати урок
-            </button>
-
-            {/* ФОРМА */}
             {showForm && (
               <div className="lesson-form">
-                <select
-                  value={form.day}
-                  onChange={(e) =>
-                    setForm({ ...form, day: e.target.value })
-                  }
-                >
-                  {daysOfWeek.map((d) => (
-                    <option key={d}>{d}</option>
-                  ))}
-                </select>
-
-                <input
-                  placeholder="09:00"
-                  value={form.start}
-                  onChange={(e) =>
-                    setForm({ ...form, start: e.target.value })
-                  }
-                />
-
-                <input
-                  placeholder="10:30"
-                  value={form.end}
-                  onChange={(e) =>
-                    setForm({ ...form, end: e.target.value })
-                  }
-                />
-
-                <input
-                  placeholder="Предмет"
-                  value={form.lessonName}
-                  onChange={(e) =>
-                    setForm({ ...form, lessonName: e.target.value })
-                  }
-                />
-                <input
-                  placeholder="Опис (необов'язково)"
-                  value={form.lessonName}
-                  onChange={(e) =>
-                    setForm({ ...form, lessonName: e.target.value })
-                  }
-                />
-
-                <button onClick={addLesson}>Зберегти</button>
+                <label>
+                  День
+                  <select
+                    value={form.day}
+                    onChange={(e) => setForm({ ...form, day: e.target.value })}
+                  >
+                    {daysOfWeek.map((d) => <option key={d}>{d}</option>)}
+                  </select>
+                </label>
+                <label>
+                  Начало
+                  <input
+                    type="time"
+                    value={form.start}
+                    onChange={(e) => setForm({ ...form, start: e.target.value })}
+                  />
+                </label>
+                <label>
+                  Окончание
+                  <input
+                    type="time"
+                    value={form.end}
+                    onChange={(e) => setForm({ ...form, end: e.target.value })}
+                  />
+                </label>
+                <label>
+                  Предмет
+                  <input
+                    value={form.lessonName}
+                    onChange={(e) => setForm({ ...form, lessonName: e.target.value })}
+                  />
+                </label>
+                <button type="button" onClick={addLesson}>Сохранить</button>
               </div>
             )}
-           {/* КАЛЕНДАРЬ */}
             <div className="week-grid">
               {daysOfWeek.map((day) => {
                 const lessons = (selectedTeacher.lessons || [])
@@ -213,18 +230,13 @@ const AdminSchedule = () => {
                     <h3>{day}</h3>
 
                     {lessons.length === 0 ? (
-                      <p className="empty">Немає уроків</p>
+                      <p className="empty">Нет уроков</p>
                     ) : (
                       lessons.map((l) => (
                         <div key={l.id} className="lesson-card">
                           <strong>{l.lessonName}</strong>
-                          <div>
-                            {l.start} - {l.end}
-                          </div>
-
-                          <button onClick={() => deleteLesson(l.id)}>
-                            x
-                          </button>
+                          <span>{l.start}–{l.end}</span>
+                          <button type="button" aria-label={`Удалить урок ${l.lessonName}`} onClick={() => deleteLesson(l.id)}>×</button>
                         </div>
                       ))
                     )}
@@ -234,10 +246,10 @@ const AdminSchedule = () => {
             </div>
           </>
         ) : (
-          <p>Виберіть вчителя</p>
+          !loading && !error && <p className="admin-message">Учителей пока нет.</p>
         )}
       </div>
-    </div>
+    </main>
   );
 };
 

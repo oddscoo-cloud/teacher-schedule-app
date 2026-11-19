@@ -9,15 +9,18 @@ public class WorkspaceService : IWorkspaceService
     private readonly IWorkspaceMembershipRepository _membershipRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly ITeacherRepository _teacherRepository;
+    private readonly IUserRepository _userRepository;
 
     public WorkspaceService(
         IWorkspaceMembershipRepository membershipRepository,
         IStudentRepository studentRepository,
-        ITeacherRepository teacherRepository)
+        ITeacherRepository teacherRepository,
+        IUserRepository userRepository)
     {
         _membershipRepository = membershipRepository;
         _studentRepository = studentRepository;
         _teacherRepository = teacherRepository;
+        _userRepository = userRepository;
     }
 
     public async Task<IEnumerable<WorkspaceMembershipEntity>> GetUserWorkspacesAsync(int userId)
@@ -56,13 +59,30 @@ public class WorkspaceService : IWorkspaceService
         if (student == null)
             return false;
 
-        if (membership.WorkspaceType == WorkspaceType.School && membership.SchoolId == student.SchoolId)
-            return true;
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+            return false;
 
-        if (membership.WorkspaceType == WorkspaceType.Standalone)
+        if (membership.WorkspaceType == WorkspaceType.School &&
+            membership.SchoolId.HasValue &&
+            membership.SchoolId == student.SchoolId)
         {
-            var teacher = await _teacherRepository.GetByUserIdAsync(userId);
-            if (teacher != null && student.StandaloneTeacherId == teacher.Id)
+            if (user.Role == UserRole.SchoolAdmin)
+                return true;
+            if (user.Role != UserRole.Teacher)
+                return false;
+
+            var schoolTeacher = await _teacherRepository.GetByUserIdAndSchoolIdAsync(userId, membership.SchoolId);
+            return schoolTeacher != null && student.TeacherAssignments.Any(assignment =>
+                assignment.TeacherId == schoolTeacher.Id && assignment.IsSchool);
+        }
+
+        if (membership.WorkspaceType == WorkspaceType.Standalone && user.Role == UserRole.Teacher)
+        {
+            var teacher = await _teacherRepository.GetByUserIdAndSchoolIdAsync(userId, null);
+            if (teacher != null &&
+                student.SchoolId == null &&
+                student.StandaloneTeacherId == teacher.Id)
                 return true;
         }
 

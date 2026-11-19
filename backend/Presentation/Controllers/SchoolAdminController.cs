@@ -78,7 +78,8 @@ public class SchoolAdminController : ControllerBase
             _studentRepository,
             _teacherRepository,
             _schoolRepository,
-            _userRepository);
+            _userRepository,
+            _membershipRepository);
 
         var (success, message) = await useCase.ExecuteAsync(
             request.StudentId,
@@ -105,7 +106,7 @@ public class SchoolAdminController : ControllerBase
             id = s.Id,
             firstName = s.FirstName,
             lastName = s.LastName,
-            email = s.User.Email,
+            email = s.Email ?? s.User?.Email,
             status = s.Status.ToString(),
             phoneNumber = s.PhoneNumber,
             teachers = s.TeacherAssignments.Select(ta => new { id = ta.TeacherId, name = ta.Teacher.FirstName + " " + ta.Teacher.LastName })

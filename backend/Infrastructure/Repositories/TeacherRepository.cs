@@ -28,6 +28,13 @@ public class TeacherRepository : ITeacherRepository
             .FirstOrDefaultAsync(t => t.UserId == userId);
     }
 
+    public async Task<TeacherEntity?> GetByUserIdAndSchoolIdAsync(int userId, int? schoolId)
+    {
+        return await _context.TeacherEntities
+            .Include(t => t.StudentAssignments)
+            .SingleOrDefaultAsync(t => t.UserId == userId && t.SchoolId == schoolId);
+    }
+
     public async Task<IEnumerable<TeacherEntity>> GetBySchoolIdAsync(int schoolId)
     {
         return await _context.TeacherEntities

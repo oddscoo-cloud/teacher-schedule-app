@@ -1,39 +1,18 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import "./LoginFormStyle.css";
 import { useNavigate } from "react-router-dom";
-import Header from "../../Header/Header";
 import API_BASE_URL from "../../../api";
 
 const LoginForm = ({ onLogin }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [scrollY, setScrollY] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
-  const formRef = useRef(null);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    if (formRef.current) {
-      const scale = Math.max(0.85, 1 - scrollY * 0.0008);
-      const opacity = Math.max(0.6, 1 - scrollY * 0.0015);
-      const translateY = scrollY * 0.3;
-
-      formRef.current.style.transform = `scale(${scale}) translateY(${translateY}px)`;
-      formRef.current.style.opacity = opacity;
-    }
-  }, [scrollY]);
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setSubmitting(true);
+    setError("");
     try {
       const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
@@ -41,73 +20,79 @@ const LoginForm = ({ onLogin }) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          login: username,
-          password: password,
+          email: username,
+          password,
         }),
       });
 
       if (!res.ok) {
-        setError("Невірний логін або пароль");
+        setError("Неверный логин или пароль.");
         return;
       }
 
       const data = await res.json();
-
-      setError("");
-
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.role);
-      localStorage.setItem("teacherId", data.teacherId ?? "");
-      console.log("Полученный токен:", data);
-
-      if (data.role?.toLowerCase() === "admin") {
-        navigate("/admin");
-      } else if (data.role?.toLowerCase() === "teacher") {
-        navigate("/teacher");
+      const normalizedRole = data.user?.role?.toLowerCase();
+      const destination = {
+        admin: "/admin",
+        teacher: "/teacher",
+        schooladmin: "/admin/school/students",
+      }[normalizedRole];
+      if (!destination) {
+        setError("Для этой учётной записи не настроен доступ.");
+        return;
       }
 
+      setError("");
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("role", data.user.role);
+      localStorage.setItem("workspaces", JSON.stringify(data.workspaces || []));
+      const activeWorkspace = (data.workspaces || []).find((workspace) => workspace.isDefault);
+      localStorage.setItem("activeWorkspaceId", activeWorkspace?.id?.toString() || "");
+      onLogin?.(data);
+      navigate(destination);
+
     } catch (err) {
-      setError("Помилка сервера");
+      setError("Не удалось подключиться к серверу. Попробуйте ещё раз.");
       console.error(err);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <>
-      <div className="login-form-container">
-        
+    <main className="login-page">
+      <section className="login-panel">
+        <p className="login-eyebrow">Рабочее пространство школы</p>
+        <h1>С возвращением</h1>
+        <p className="login-description">Войдите, чтобы открыть расписание и список учеников.</p>
+        <form onSubmit={handleSubmit} className="login-form">
+          <label htmlFor="login-username">Логин</label>
+          <input
+            id="login-username"
+            autoComplete="username"
+            required
+            value={username}
+            onChange={(event) => setUsername(event.target.value)}
+          />
 
-        <div className="login-form" ref={formRef}>
-          <form onSubmit={handleSubmit} className="form">
-            
-            <label>Логін</label>
-            <input
-              placeholder="Логін"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
+          <label htmlFor="login-password">Пароль</label>
+          <input
+            id="login-password"
+            type="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
 
-            <label>Пароль</label>
-            <input
-              type="password"
-              placeholder="Пароль"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+          <button type="submit" className="login-button" disabled={submitting}>
+            {submitting ? "Входим…" : "Войти"}
+          </button>
 
-            <button type="submit" className="login-button">
-              Увійти
-            </button>
-
-            {error && (
-              <p className="login-error">
-                {error}
-              </p>
-            )}
-          </form>
-        </div>
-      </div>
-    </>
+          {error && <p className="login-error" role="alert">{error}</p>}
+        </form>
+      </section>
+    </main>
   );
 };
 
