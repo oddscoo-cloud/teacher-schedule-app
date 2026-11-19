@@ -180,6 +180,34 @@ public class StudentService : IStudentService
         return student;
     }
 
+    public async Task<bool> DeleteStudentAsync(
+        int userId,
+        UserRole role,
+        int membershipId,
+        int studentId)
+    {
+        var access = await _workspaceAccess.ResolveAsync(userId, role, membershipId);
+        if (access == null)
+            return false;
+
+        var student = await _workspaceAccess.VisibleStudents(access)
+            .Include(item => item.Contacts)
+            .Include(item => item.CourseAssignments)
+            .Include(item => item.TeacherAssignments)
+            .Include(item => item.Notes)
+            .SingleOrDefaultAsync(item => item.Id == studentId);
+        if (student == null)
+            return false;
+
+        _db.StudentContacts.RemoveRange(student.Contacts);
+        _db.StudentNotes.RemoveRange(student.Notes);
+        _db.Set<StudentCourseAssignmentEntity>().RemoveRange(student.CourseAssignments);
+        _db.StudentAssignments.RemoveRange(student.TeacherAssignments);
+        _db.StudentEntities.Remove(student);
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
     private async Task<List<CourseEntity>?> GetCoursesAsync(
         StudentWorkspaceAccess access,
         IReadOnlyCollection<int> courseIds)

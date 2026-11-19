@@ -16,6 +16,17 @@
   margin-bottom: 24px;
 }
 
+.student-card-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.student-danger-button {
+  border-color: #b44a3a !important;
+  background: white !important;
+  color: #b44a3a !important;
+}
+
 .student-management h1 {
   margin: 0;
   color: var(--color-ink);

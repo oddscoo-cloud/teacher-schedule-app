@@ -47,6 +47,10 @@ export const createStudent = (student) =>
   request("/students", jsonRequest("POST", student));
 export const updateStudent = (id, student) =>
   request(`/students/${id}`, jsonRequest("PUT", student));
+export const deleteStudent = (id) =>
+  request(`/students/${id}`, { method: "DELETE" });
+export const switchWorkspace = (membershipId) =>
+  request(`/auth/switch-workspace/${membershipId}`, { method: "POST" });
 
 export const fetchCourses = () => request("/courses");
 export const createCourse = (course) =>

@@ -98,6 +98,20 @@ public class StudentsController : AuthorizedWorkspaceControllerBase
         return student == null ? NotFound() : Ok(ToResponse(student));
     }
 
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteStudent(int id)
+    {
+        if (!TryGetRequester(out var requester))
+            return Unauthorized();
+
+        var deleted = await _students.DeleteStudentAsync(
+            requester.UserId,
+            requester.Role,
+            requester.MembershipId,
+            id);
+        return deleted ? NoContent() : NotFound();
+    }
+
     private static StudentEntity ToEntity(StudentRequestDto request) => new()
     {
         FirstName = request.FirstName.Trim(),

@@ -29,4 +29,10 @@ public interface IStudentService
         StudentEntity updatedStudent,
         IReadOnlyCollection<int> courseIds,
         IReadOnlyCollection<StudentContactEntity> contacts);
+
+    Task<bool> DeleteStudentAsync(
+        int userId,
+        UserRole role,
+        int membershipId,
+        int studentId);
 }

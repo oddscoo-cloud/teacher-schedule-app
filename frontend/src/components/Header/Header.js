@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { switchWorkspace as switchWorkspaceRequest } from "../../api";
 import "./HeaderStyles/HeaderStyle.css";
 
 function Header() {
@@ -11,12 +12,32 @@ function Header() {
   const canManageSchedule = role === "admin" || role === "teacher";
   const homePath = role === "admin" ? "/admin" : role === "teacher" ? "/teacher" : "/admin/school/students";
   const basePath = isAdmin ? "/admin/school/students" : "/teacher/students";
+  const workspaces = JSON.parse(localStorage.getItem("workspaces") || "[]");
+  const activeWorkspaceId = localStorage.getItem("activeWorkspaceId");
+  const canSwitchWorkspace = workspaces.length > 1;
 
   const signOut = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     localStorage.removeItem("teacherId");
+    localStorage.removeItem("workspaces");
+    localStorage.removeItem("activeWorkspaceId");
     navigate("/login");
+  };
+
+  const switchWorkspace = async (event) => {
+    const membershipId = Number(event.target.value);
+    if (!membershipId) return;
+    try {
+      const data = await switchWorkspaceRequest(membershipId);
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("role", data.user.role);
+      localStorage.setItem("workspaces", JSON.stringify(data.workspaces || []));
+      localStorage.setItem("activeWorkspaceId", membershipId.toString());
+      window.location.reload();
+    } catch (error) {
+      window.alert(error.message);
+    }
   };
 
   return (
@@ -60,9 +81,23 @@ function Header() {
         ) : null}
 
         {isLoggedIn && (
-          <button className="app-header-action app-signout" type="button" onClick={signOut}>
-            Выйти
-          </button>
+          <>
+            {canSwitchWorkspace && (
+              <label className="app-workspace-switcher">
+                <span>Пространство</span>
+                <select value={activeWorkspaceId || ""} onChange={switchWorkspace}>
+                  {workspaces.map((workspace) => (
+                    <option key={workspace.id} value={workspace.id}>
+                      {workspace.schoolName || (workspace.type === "Standalone" ? "Личное пространство" : `Школа ${workspace.schoolId || ""}`)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            <button className="app-header-action app-signout" type="button" onClick={signOut}>
+              Выйти
+            </button>
+          </>
         )}
       </div>
     </header>

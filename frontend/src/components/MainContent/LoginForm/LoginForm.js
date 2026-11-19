@@ -20,8 +20,8 @@ const LoginForm = ({ onLogin }) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          login: username,
-          password: password,
+          email: username,
+          password,
         }),
       });
 
@@ -31,7 +31,7 @@ const LoginForm = ({ onLogin }) => {
       }
 
       const data = await res.json();
-      const normalizedRole = data.role?.toLowerCase();
+      const normalizedRole = data.user?.role?.toLowerCase();
       const destination = {
         admin: "/admin",
         teacher: "/teacher",
@@ -44,8 +44,10 @@ const LoginForm = ({ onLogin }) => {
 
       setError("");
       localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.role);
-      localStorage.setItem("teacherId", data.teacherId ?? "");
+      localStorage.setItem("role", data.user.role);
+      localStorage.setItem("workspaces", JSON.stringify(data.workspaces || []));
+      const activeWorkspace = (data.workspaces || []).find((workspace) => workspace.isDefault);
+      localStorage.setItem("activeWorkspaceId", activeWorkspace?.id?.toString() || "");
       onLogin?.(data);
       navigate(destination);
 

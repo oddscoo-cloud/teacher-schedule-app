@@ -82,6 +82,16 @@ public class StudentManagementApiTests : IClassFixture<StudentManagementApiFacto
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
+    [Fact]
+    public async Task SwitchWorkspace_MembershipBelongingToAnotherUserIsForbidden()
+    {
+        using var client = CreateClient(userId: 2, role: UserRole.Teacher, membershipId: 101);
+
+        var response = await client.PostAsync("/api/auth/switch-workspace/100", null);
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
     private HttpClient CreateClient(int userId, UserRole role, int membershipId)
     {
         var client = _factory.CreateClient();
