@@ -90,7 +90,7 @@ public sealed class StudentFinanceService
             paymentTotal,
             chargedAmount,
             chargedAmount - paymentTotal,
-            LessonChargesIntegrated: false);
+            LessonChargesIntegrated: true);
     }
 
     public async Task<FinanceWriteResult<StudentLessonChargeEntity>> RecordLessonChargeAsync(
