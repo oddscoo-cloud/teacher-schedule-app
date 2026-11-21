@@ -441,18 +441,6 @@ namespace backend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Teachers");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "John Doe"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Jane Smith"
-                        });
                 });
 
             modelBuilder.Entity("backend.Models.User", b =>
@@ -481,31 +469,6 @@ namespace backend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Login = "admin",
-                            Password = "admin",
-                            Role = "admin"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Login = "teacher1",
-                            Password = "123",
-                            Role = "teacher",
-                            TeacherId = 1
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Login = "teacher2",
-                            Password = "1234",
-                            Role = "teacher",
-                            TeacherId = 2
-                        });
                 });
 
             modelBuilder.Entity("backend.Core.Entities.CourseEntity", b =>

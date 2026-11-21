@@ -95,6 +95,37 @@
   font-size: 13px;
 }
 
+.login-success {
+  margin: 9px 0 0;
+  padding: 11px 12px;
+  border: 1px solid #c7dfcc;
+  border-radius: 7px;
+  background: #f4fbf5;
+  color: #28643a;
+  font-size: 13px;
+}
+
+.login-switch {
+  margin: 20px 0 0;
+  color: var(--color-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.login-switch button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-rust);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.login-switch button:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 480px) {
   .login-page {
     min-height: calc(100vh - 72px);

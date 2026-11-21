@@ -8,21 +8,12 @@ const TeacherSchedule = () => {
   const [teacher, setTeacher] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const teacherId = localStorage.getItem("teacherId");
 
   useEffect(() => {
     let active = true;
-    if (!teacherId) {
-      setError("Не удалось определить учётную запись учителя. Войдите в систему ещё раз.");
-      setLoading(false);
-      return () => {
-        active = false;
-      };
-    }
-
     const fetchTeacher = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/teachers/${teacherId}`, {
+        const response = await fetch(`${API_BASE_URL}/teacher/me`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
           },
@@ -45,7 +36,7 @@ const TeacherSchedule = () => {
     return () => {
       active = false;
     };
-  }, [teacherId]);
+  }, []);
 
   if (loading) {
     return <main className="schedule-page"><p className="schedule-message">Загружаем расписание…</p></main>;
