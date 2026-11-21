@@ -242,6 +242,46 @@ namespace backend.Migrations
                     b.ToTable("StudentEntities");
                 });
 
+            modelBuilder.Entity("backend.Core.Entities.StudentLessonChargeEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ChargeType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("ChargedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("LessonStartsAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("RecordedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SourceLessonId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RecordedByUserId");
+
+                    b.HasIndex("StudentId", "SourceLessonId")
+                        .IsUnique();
+
+                    b.ToTable("StudentLessonCharges");
+                });
+
             modelBuilder.Entity("backend.Core.Entities.StudentNoteEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -279,6 +319,126 @@ namespace backend.Migrations
                     b.HasIndex("StudentId", "TeacherId");
 
                     b.ToTable("StudentNotes");
+                });
+
+            modelBuilder.Entity("backend.Core.Entities.StudentPaymentAdjustmentEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("AmountDelta")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("PaidLessonCountDelta")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PaymentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTimeOffset>("RecordedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("RecordedByUserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RecordedByUserId");
+
+                    b.HasIndex("PaymentId", "IdempotencyKey")
+                        .IsUnique();
+
+                    b.ToTable("StudentPaymentAdjustments");
+                });
+
+            modelBuilder.Entity("backend.Core.Entities.StudentPaymentEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTimeOffset>("PaidAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("PaidLessonCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("RecordedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("RecordedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RecordedByUserId");
+
+                    b.HasIndex("StudentId", "IdempotencyKey")
+                        .IsUnique();
+
+                    b.ToTable("StudentPayments");
+                });
+
+            modelBuilder.Entity("backend.Core.Entities.StudentPriceHistoryEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTimeOffset>("EffectiveFrom")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("RecordedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("RecordedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RecordedByUserId");
+
+                    b.HasIndex("StudentId", "EffectiveFrom")
+                        .IsUnique();
+
+                    b.ToTable("StudentPriceHistory");
                 });
 
             modelBuilder.Entity("backend.Core.Entities.TeacherEntity", b =>
@@ -600,6 +760,25 @@ namespace backend.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("backend.Core.Entities.StudentLessonChargeEntity", b =>
+                {
+                    b.HasOne("backend.Core.Entities.UserEntity", "RecordedByUser")
+                        .WithMany()
+                        .HasForeignKey("RecordedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("backend.Core.Entities.StudentEntity", "Student")
+                        .WithMany("LessonCharges")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RecordedByUser");
+
+                    b.Navigation("Student");
+                });
+
             modelBuilder.Entity("backend.Core.Entities.StudentNoteEntity", b =>
                 {
                     b.HasOne("backend.Core.Entities.StudentEntity", "Student")
@@ -617,6 +796,63 @@ namespace backend.Migrations
                     b.Navigation("Student");
 
                     b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("backend.Core.Entities.StudentPaymentAdjustmentEntity", b =>
+                {
+                    b.HasOne("backend.Core.Entities.StudentPaymentEntity", "Payment")
+                        .WithMany("Adjustments")
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("backend.Core.Entities.UserEntity", "RecordedByUser")
+                        .WithMany()
+                        .HasForeignKey("RecordedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Payment");
+
+                    b.Navigation("RecordedByUser");
+                });
+
+            modelBuilder.Entity("backend.Core.Entities.StudentPaymentEntity", b =>
+                {
+                    b.HasOne("backend.Core.Entities.UserEntity", "RecordedByUser")
+                        .WithMany()
+                        .HasForeignKey("RecordedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("backend.Core.Entities.StudentEntity", "Student")
+                        .WithMany("Payments")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RecordedByUser");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("backend.Core.Entities.StudentPriceHistoryEntity", b =>
+                {
+                    b.HasOne("backend.Core.Entities.UserEntity", "RecordedByUser")
+                        .WithMany()
+                        .HasForeignKey("RecordedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("backend.Core.Entities.StudentEntity", "Student")
+                        .WithMany("PriceHistory")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RecordedByUser");
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("backend.Core.Entities.TeacherEntity", b =>
@@ -689,9 +925,20 @@ namespace backend.Migrations
 
                     b.Navigation("CourseAssignments");
 
+                    b.Navigation("LessonCharges");
+
                     b.Navigation("Notes");
 
+                    b.Navigation("Payments");
+
+                    b.Navigation("PriceHistory");
+
                     b.Navigation("TeacherAssignments");
+                });
+
+            modelBuilder.Entity("backend.Core.Entities.StudentPaymentEntity", b =>
+                {
+                    b.Navigation("Adjustments");
                 });
 
             modelBuilder.Entity("backend.Core.Entities.TeacherEntity", b =>

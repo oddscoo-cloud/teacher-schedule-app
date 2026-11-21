@@ -24,4 +24,7 @@ public class StudentEntity
     public ICollection<StudentContactEntity> Contacts { get; set; } = new List<StudentContactEntity>();
     public ICollection<StudentCourseAssignmentEntity> CourseAssignments { get; set; } = new List<StudentCourseAssignmentEntity>();
     public ICollection<StudentNoteEntity> Notes { get; set; } = new List<StudentNoteEntity>();
+    public ICollection<StudentPriceHistoryEntity> PriceHistory { get; set; } = new List<StudentPriceHistoryEntity>();
+    public ICollection<StudentPaymentEntity> Payments { get; set; } = new List<StudentPaymentEntity>();
+    public ICollection<StudentLessonChargeEntity> LessonCharges { get; set; } = new List<StudentLessonChargeEntity>();
 }
