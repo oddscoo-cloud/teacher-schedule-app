@@ -208,6 +208,203 @@ namespace backend.Migrations
                     b.ToTable("HomeworkSubmissions");
                 });
 
+            modelBuilder.Entity("backend.Core.Entities.LessonEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<TimeSpan>("Duration")
+                        .HasColumnType("time");
+
+                    b.Property<DateTime>("ModifiedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<int?>("RescheduledFromId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ScheduledAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("SchoolId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SeriesId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SeriesInstanceIndex")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StatusReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TeacherId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Timezone")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("ModifiedByUserId");
+
+                    b.HasIndex("RescheduledFromId");
+
+                    b.HasIndex("SchoolId");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("SeriesId", "SeriesInstanceIndex")
+                        .IsUnique()
+                        .HasFilter("[SeriesId] IS NOT NULL AND [SeriesInstanceIndex] IS NOT NULL");
+
+                    b.HasIndex("SeriesId", "Status");
+
+                    b.HasIndex("TeacherId", "StudentId", "ScheduledAtUtc");
+
+                    b.ToTable("LessonEvents");
+                });
+
+            modelBuilder.Entity("backend.Core.Entities.LessonRescheduleEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("NewLessonId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OriginalLessonId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RescheduleByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("RescheduleDateUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RescheduleReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NewLessonId")
+                        .IsUnique();
+
+                    b.HasIndex("OriginalLessonId")
+                        .IsUnique();
+
+                    b.HasIndex("RescheduleByUserId");
+
+                    b.ToTable("LessonReschedules");
+                });
+
+            modelBuilder.Entity("backend.Core.Entities.LessonSeriesEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<TimeSpan>("Duration")
+                        .HasColumnType("time");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("SchoolId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("time");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TeacherId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Timezone")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("SchoolId");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("TeacherId", "StudentId", "StartDate");
+
+                    b.ToTable("LessonSeries");
+                });
+
             modelBuilder.Entity("backend.Core.Entities.SchoolEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -298,7 +495,7 @@ namespace backend.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("StudentCourseAssignmentEntity");
+                    b.ToTable("StudentCourseAssignments");
                 });
 
             modelBuilder.Entity("backend.Core.Entities.StudentEntity", b =>
@@ -819,6 +1016,104 @@ namespace backend.Migrations
                     b.Navigation("Homework");
                 });
 
+            modelBuilder.Entity("backend.Core.Entities.LessonEntity", b =>
+                {
+                    b.HasOne("backend.Core.Entities.CourseEntity", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("backend.Core.Entities.UserEntity", null)
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("backend.Core.Entities.LessonEntity", "RescheduledFrom")
+                        .WithMany("RescheduledTo")
+                        .HasForeignKey("RescheduledFromId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("backend.Core.Entities.SchoolEntity", null)
+                        .WithMany()
+                        .HasForeignKey("SchoolId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("backend.Core.Entities.LessonSeriesEntity", "Series")
+                        .WithMany("Lessons")
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("backend.Core.Entities.StudentEntity", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("backend.Core.Entities.TeacherEntity", null)
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("RescheduledFrom");
+
+                    b.Navigation("Series");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("backend.Core.Entities.LessonRescheduleEntity", b =>
+                {
+                    b.HasOne("backend.Core.Entities.LessonEntity", "NewLesson")
+                        .WithMany("RescheduleHistoryAsNew")
+                        .HasForeignKey("NewLessonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("backend.Core.Entities.LessonEntity", "OriginalLesson")
+                        .WithMany("RescheduleHistoryAsOriginal")
+                        .HasForeignKey("OriginalLessonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("backend.Core.Entities.UserEntity", null)
+                        .WithMany()
+                        .HasForeignKey("RescheduleByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("NewLesson");
+
+                    b.Navigation("OriginalLesson");
+                });
+
+            modelBuilder.Entity("backend.Core.Entities.LessonSeriesEntity", b =>
+                {
+                    b.HasOne("backend.Core.Entities.CourseEntity", null)
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("backend.Core.Entities.SchoolEntity", null)
+                        .WithMany()
+                        .HasForeignKey("SchoolId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("backend.Core.Entities.StudentEntity", null)
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("backend.Core.Entities.TeacherEntity", null)
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("backend.Core.Entities.StudentAssignmentEntity", b =>
                 {
                     b.HasOne("backend.Core.Entities.StudentEntity", "Student")
@@ -1060,6 +1355,20 @@ namespace backend.Migrations
             modelBuilder.Entity("backend.Core.Entities.HomeworkSubmissionEntity", b =>
                 {
                     b.Navigation("Attachments");
+                });
+
+            modelBuilder.Entity("backend.Core.Entities.LessonEntity", b =>
+                {
+                    b.Navigation("RescheduleHistoryAsNew");
+
+                    b.Navigation("RescheduleHistoryAsOriginal");
+
+                    b.Navigation("RescheduledTo");
+                });
+
+            modelBuilder.Entity("backend.Core.Entities.LessonSeriesEntity", b =>
+                {
+                    b.Navigation("Lessons");
                 });
 
             modelBuilder.Entity("backend.Core.Entities.SchoolEntity", b =>
