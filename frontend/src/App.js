@@ -10,6 +10,7 @@ import StudentList from "./components/Students/StudentList";
 import StudentCard from "./components/Students/StudentCard";
 import StudentForm from "./components/Students/StudentForm";
 import SchoolCourses from "./components/Students/SchoolCourses";
+import HomeworkPage from "./components/Homework/HomeworkPage";
 
 function App() {
   return (
@@ -107,6 +108,14 @@ function App() {
           element={
             <ProtectedRoute role="schooladmin">
               <SchoolCourses />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/homework"
+          element={
+            <ProtectedRoute>
+              <HomeworkPage />
             </ProtectedRoute>
           }
         />
