@@ -43,6 +43,16 @@ export const fetchStudents = ({ search, course, status } = {}) => {
 };
 
 export const fetchStudent = (id) => request(`/students/${id}`);
+export const fetchStudentFinance = (id) => request(`/students/${id}/finance`);
+export const setStudentPrice = (id, price) =>
+  request(`/students/${id}/finance/prices`, jsonRequest("POST", price));
+export const recordStudentPayment = (id, payment) =>
+  request(`/students/${id}/finance/payments`, jsonRequest("POST", payment));
+export const adjustStudentPayment = (studentId, paymentId, adjustment) =>
+  request(
+    `/students/${studentId}/finance/payments/${paymentId}/adjustments`,
+    jsonRequest("POST", adjustment),
+  );
 export const createStudent = (student) =>
   request("/students", jsonRequest("POST", student));
 export const updateStudent = (id, student) =>

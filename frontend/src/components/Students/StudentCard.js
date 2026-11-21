@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { deleteStudent, fetchStudent } from "../../api";
 import StudentNotesList from "./StudentNotesList";
+import StudentFinancePanel from "./StudentFinancePanel";
 import "./StudentManagement.css";
 
 const StudentCard = ({ admin = false }) => {
@@ -89,6 +90,7 @@ const StudentCard = ({ admin = false }) => {
         <h2>История занятий</h2>
         <p>История появится после подключения календаря занятий.</p>
       </section>
+      <StudentFinancePanel studentId={Number(id)} />
       <StudentNotesList studentId={Number(id)} canEdit={!admin} />
     </main>
   );
