@@ -33,39 +33,6 @@ namespace backend.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Legacy data - marked for removal after migration
-            modelBuilder.Entity<Teacher>().HasData(
-                new Teacher { Id = 1, Name = "John Doe" },
-                new Teacher { Id = 2, Name = "Jane Smith" }
-            );
-
-            modelBuilder.Entity<User>().HasData(
-                new User
-                {
-                    Id = 1,
-                    Login = "admin",
-                    Password = "admin",
-                    Role = "admin",
-                    TeacherId = null
-                },
-                new User
-                {
-                    Id = 2,
-                    Login = "teacher1",
-                    Password = "123",
-                    Role = "teacher",
-                    TeacherId = 1
-                },
-                new User
-                {
-                    Id = 3,
-                    Login = "teacher2",
-                    Password = "1234",
-                    Role = "teacher",
-                    TeacherId = 2
-                }
-            );
-
             // Configure new Clean Architecture entities
             ConfigureUserEntity(modelBuilder);
             ConfigureSchoolEntity(modelBuilder);

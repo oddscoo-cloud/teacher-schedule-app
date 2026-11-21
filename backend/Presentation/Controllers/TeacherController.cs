@@ -33,6 +33,38 @@ public class TeacherController : ControllerBase
         _studentService = studentService;
     }
 
+    [HttpGet("me")]
+    public async Task<ActionResult<object>> GetCurrentTeacher()
+    {
+        var userId = GetUserId();
+        if (userId == null)
+            return Unauthorized();
+
+        if (!int.TryParse(User.FindFirst("workspaceMembershipId")?.Value, out var membershipId))
+            return Unauthorized();
+
+        var membership = await _membershipRepository.GetByIdAsync(membershipId);
+        if (membership == null || membership.UserId != userId.Value)
+            return Forbid();
+
+        if (membership.WorkspaceType == WorkspaceType.School && !membership.SchoolId.HasValue)
+            return Forbid();
+
+        var schoolId = membership.WorkspaceType == WorkspaceType.Standalone
+            ? null
+            : membership.SchoolId;
+        var teacher = await _teacherRepository.GetByUserIdAndSchoolIdAsync(userId.Value, schoolId);
+        if (teacher == null)
+            return NotFound(new { message = "Teacher account not found" });
+
+        return Ok(new
+        {
+            id = teacher.Id,
+            name = $"{teacher.FirstName} {teacher.LastName}",
+            lessons = Array.Empty<object>()
+        });
+    }
+
     [HttpPost("confirm-student")]
     public async Task<ActionResult<object>> ConfirmStudent([FromBody] ConfirmStandaloneStudentDto request)
     {

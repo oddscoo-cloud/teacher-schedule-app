@@ -130,7 +130,8 @@ public class StudentService : IStudentService
 
         _db.StudentEntities.Add(student);
         await _db.SaveChangesAsync();
-        return student;
+        return await GetStudentAsync(userId, role, membershipId, student.Id)
+            ?? throw new InvalidOperationException("Created student could not be loaded in the active workspace.");
     }
 
     public async Task<StudentEntity?> UpdateStudentAsync(

@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Json;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
@@ -83,6 +84,51 @@ public class StudentManagementApiTests : IClassFixture<StudentManagementApiFacto
     }
 
     [Fact]
+    public async Task GetCurrentTeacher_ReturnsProfileForActiveWorkspace()
+    {
+        using var client = CreateClient(userId: 2, role: UserRole.Teacher, membershipId: 101);
+
+        var response = await client.GetAsync("/api/teacher/me");
+        var body = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        using var json = JsonDocument.Parse(body);
+        Assert.Equal(10, json.RootElement.GetProperty("id").GetInt32());
+        Assert.Equal("A Teacher", json.RootElement.GetProperty("name").GetString());
+        Assert.Empty(json.RootElement.GetProperty("lessons").EnumerateArray());
+    }
+
+    [Fact]
+    public async Task GetCurrentTeacher_RejectsMembershipFromAnotherUser()
+    {
+        using var client = CreateClient(userId: 2, role: UserRole.Teacher, membershipId: 100);
+
+        var response = await client.GetAsync("/api/teacher/me");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CreateStudent_StandaloneTeacherReceivesLoadedAssignmentDetails()
+    {
+        using var client = CreateClient(userId: 4, role: UserRole.Teacher, membershipId: 103);
+
+        var response = await client.PostAsJsonAsync("/api/students", new
+        {
+            firstName = "New",
+            lastName = "Student"
+        });
+        var body = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        using var json = JsonDocument.Parse(body);
+        var assignment = Assert.Single(json.RootElement.GetProperty("assignments").EnumerateArray());
+        Assert.Equal(12, assignment.GetProperty("teacherId").GetInt32());
+        Assert.Equal("Standalone Teacher", assignment.GetProperty("teacherName").GetString());
+        Assert.Equal("standalone@example.test", assignment.GetProperty("teacherEmail").GetString());
+    }
+
+    [Fact]
     public async Task SwitchWorkspace_MembershipBelongingToAnotherUserIsForbidden()
     {
         using var client = CreateClient(userId: 2, role: UserRole.Teacher, membershipId: 101);
@@ -138,14 +184,17 @@ public class StudentManagementApiFactory : WebApplicationFactory<Program>
         db.UserEntities.AddRange(
             new UserEntity { Id = 1, Email = "admin@example.test", PasswordHash = "hash", Role = UserRole.SchoolAdmin, Status = AccountStatus.Active },
             new UserEntity { Id = 2, Email = "teacher@example.test", PasswordHash = "hash", Role = UserRole.Teacher, Status = AccountStatus.Active },
-            new UserEntity { Id = 3, Email = "other@example.test", PasswordHash = "hash", Role = UserRole.Teacher, Status = AccountStatus.Active });
+            new UserEntity { Id = 3, Email = "other@example.test", PasswordHash = "hash", Role = UserRole.Teacher, Status = AccountStatus.Active },
+            new UserEntity { Id = 4, Email = "standalone@example.test", PasswordHash = "hash", Role = UserRole.Teacher, Status = AccountStatus.Active });
         db.TeacherEntities.AddRange(
             new TeacherEntity { Id = 10, UserId = 2, SchoolId = 1, FirstName = "A", LastName = "Teacher" },
-            new TeacherEntity { Id = 11, UserId = 3, SchoolId = 1, FirstName = "B", LastName = "Teacher" });
+            new TeacherEntity { Id = 11, UserId = 3, SchoolId = 1, FirstName = "B", LastName = "Teacher" },
+            new TeacherEntity { Id = 12, UserId = 4, FirstName = "Standalone", LastName = "Teacher" });
         db.WorkspaceMemberships.AddRange(
             new WorkspaceMembershipEntity { Id = 100, UserId = 1, SchoolId = 1, WorkspaceType = WorkspaceType.School },
             new WorkspaceMembershipEntity { Id = 101, UserId = 2, SchoolId = 1, WorkspaceType = WorkspaceType.School },
-            new WorkspaceMembershipEntity { Id = 102, UserId = 3, SchoolId = 1, WorkspaceType = WorkspaceType.School });
+            new WorkspaceMembershipEntity { Id = 102, UserId = 3, SchoolId = 1, WorkspaceType = WorkspaceType.School },
+            new WorkspaceMembershipEntity { Id = 103, UserId = 4, WorkspaceType = WorkspaceType.Standalone });
         db.StudentEntities.AddRange(
             new StudentEntity { Id = 1, SchoolId = 1, FirstName = "One", LastName = "Student", Status = AccountStatus.Active },
             new StudentEntity { Id = 2, SchoolId = 1, FirstName = "Two", LastName = "Student", Status = AccountStatus.Active },
