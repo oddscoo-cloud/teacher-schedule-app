@@ -1,0 +1,252 @@
+.homework-page {
+  width: min(1120px, calc(100% - 32px));
+  margin: 36px auto 64px;
+  color: #172033;
+}
+
+.homework-page-heading {
+  margin-bottom: 24px;
+}
+
+.homework-page-heading h1 {
+  margin: 4px 0 8px;
+  font-size: clamp(28px, 4vw, 38px);
+}
+
+.homework-page-heading p {
+  color: #667085;
+}
+
+.homework-eyebrow {
+  margin: 0;
+  color: #5967c4 !important;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.homework-panel,
+.homework-card {
+  margin-bottom: 18px;
+  padding: 22px;
+  border: 1px solid #e4e8f0;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 26px rgb(23 32 51 / 5%);
+}
+
+.homework-panel h2,
+.homework-card h2 {
+  margin: 0 0 14px;
+  font-size: 20px;
+}
+
+.homework-create-form,
+.homework-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.homework-create-form label,
+.homework-filters label,
+.homework-submission-form label,
+.homework-grade-form label {
+  display: grid;
+  gap: 6px;
+  color: #475467;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.homework-create-form input,
+.homework-create-form select,
+.homework-create-form textarea,
+.homework-filters select,
+.homework-submission-form input,
+.homework-submission-form textarea,
+.homework-grade-form input {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 9px;
+  color: #172033;
+  font: inherit;
+}
+
+.homework-form-wide {
+  grid-column: 1 / -1;
+}
+
+.homework-create-form button,
+.homework-submission-form button,
+.homework-grade-form button {
+  width: fit-content;
+  align-self: end;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 9px;
+  background: #5967c4;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.homework-create-form button:disabled,
+.homework-submission-form button:disabled,
+.homework-grade-form button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.homework-filters {
+  grid-template-columns: repeat(2, minmax(180px, 260px));
+  margin: 20px 0;
+}
+
+.homework-list {
+  display: grid;
+  gap: 2px;
+}
+
+.homework-card-heading,
+.homework-submission-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.homework-card-heading h2 {
+  margin-bottom: 6px;
+}
+
+.homework-card-heading p,
+.homework-submission-heading span,
+.homework-due {
+  margin: 0;
+  color: #667085;
+  font-size: 13px;
+}
+
+.homework-status {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #fff3d6;
+  color: #8a5a00;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.homework-status.graded {
+  background: #e4f5ea;
+  color: #247044;
+}
+
+.homework-instructions {
+  margin: 16px 0 8px;
+  white-space: pre-wrap;
+}
+
+.homework-due {
+  margin-top: 10px;
+}
+
+.homework-submission {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #f7f8fc;
+}
+
+.homework-submission-heading strong {
+  color: #313e77;
+}
+
+.homework-submission > p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.homework-submission > a {
+  overflow-wrap: anywhere;
+  color: #4858b8;
+}
+
+.homework-attachment {
+  width: fit-content;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #4858b8;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.homework-grade-form,
+.homework-submission-form {
+  display: grid;
+  gap: 12px;
+}
+
+.homework-grade-form {
+  grid-template-columns: minmax(120px, 180px) auto;
+  align-items: end;
+  justify-content: start;
+  margin-top: 4px;
+}
+
+.homework-submission-form {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e4e8f0;
+}
+
+.homework-alert {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border: 1px solid #f1b6b6;
+  border-radius: 9px;
+  background: #fff1f1;
+  color: #8c2828;
+}
+
+.homework-empty {
+  padding: 28px;
+  border: 1px dashed #cfd5e1;
+  border-radius: 14px;
+  color: #667085;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .homework-page {
+    width: min(100% - 20px, 1120px);
+    margin-top: 24px;
+  }
+
+  .homework-panel,
+  .homework-card {
+    padding: 16px;
+  }
+
+  .homework-create-form,
+  .homework-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .homework-card-heading {
+    flex-direction: column;
+  }
+
+  .homework-grade-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -65,6 +65,12 @@ function Header() {
             >
               Ученики
             </NavLink>
+            <NavLink
+              to="/homework"
+              className={({ isActive }) => `app-nav-link${isActive ? " active" : ""}`}
+            >
+              Домашние задания
+            </NavLink>
             {isAdmin && (
               <NavLink
                 to="/admin/school/courses"

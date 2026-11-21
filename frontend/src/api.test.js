@@ -1,4 +1,9 @@
-import { fetchStudents, createStudent } from "./api";
+import {
+  createStudent,
+  fetchHomeworks,
+  fetchStudents,
+  submitHomework,
+} from "./api";
 
 describe("student API client", () => {
   beforeEach(() => {
@@ -32,5 +37,33 @@ describe("student API client", () => {
     });
 
     await expect(createStudent({ firstName: "" })).rejects.toThrow("Invalid student");
+  });
+
+  test("fetchHomeworks sends student and course filters", async () => {
+    global.fetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => [],
+    });
+
+    await fetchHomeworks({ studentId: 7, courseId: 3 });
+
+    expect(global.fetch.mock.calls[0][0]).toContain("/homework?studentId=7&courseId=3");
+  });
+
+  test("submitHomework lets the browser set the multipart content type", async () => {
+    global.fetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({}),
+    });
+    const image = new File(["photo"], "photo.png", { type: "image/png" });
+
+    await submitHomework(5, { text: "answer", links: ["https://example.test"], files: [image] });
+
+    const [, options] = global.fetch.mock.calls[0];
+    expect(options.body).toBeInstanceOf(FormData);
+    expect(options.headers["Content-Type"]).toBeUndefined();
+    expect(options.headers.Authorization).toBe("Bearer test-token");
   });
 });

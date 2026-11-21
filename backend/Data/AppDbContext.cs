@@ -28,6 +28,13 @@ namespace backend.Data
         public DbSet<StudentContactEntity> StudentContacts { get; set; }
         public DbSet<CourseEntity> Courses { get; set; }
         public DbSet<StudentNoteEntity> StudentNotes { get; set; }
+        public DbSet<StudentPriceHistoryEntity> StudentPriceHistory { get; set; }
+        public DbSet<StudentPaymentEntity> StudentPayments { get; set; }
+        public DbSet<StudentPaymentAdjustmentEntity> StudentPaymentAdjustments { get; set; }
+        public DbSet<StudentLessonChargeEntity> StudentLessonCharges { get; set; }
+        public DbSet<HomeworkEntity> Homeworks { get; set; }
+        public DbSet<HomeworkSubmissionEntity> HomeworkSubmissions { get; set; }
+        public DbSet<HomeworkAttachmentEntity> HomeworkAttachments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -43,6 +50,8 @@ namespace backend.Data
             ConfigureContactEntities(modelBuilder);
             ConfigureCourseEntity(modelBuilder);
             ConfigureStudentNoteEntity(modelBuilder);
+            ConfigureStudentFinanceEntities(modelBuilder);
+            ConfigureHomeworkEntities(modelBuilder);
         }
 
         private void ConfigureUserEntity(ModelBuilder modelBuilder)
@@ -241,6 +250,125 @@ namespace backend.Data
                     .HasForeignKey(e => e.TeacherId)
                     .OnDelete(DeleteBehavior.Restrict);
                 entity.HasIndex(e => new { e.StudentId, e.TeacherId });
+            });
+        }
+
+        private void ConfigureStudentFinanceEntities(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<StudentPriceHistoryEntity>(entity =>
+            {
+                entity.HasKey(item => item.Id);
+                entity.Property(item => item.Amount).HasPrecision(18, 2);
+                entity.HasOne(item => item.Student)
+                    .WithMany(student => student.PriceHistory)
+                    .HasForeignKey(item => item.StudentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(item => item.RecordedByUser)
+                    .WithMany()
+                    .HasForeignKey(item => item.RecordedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasIndex(item => new { item.StudentId, item.EffectiveFrom }).IsUnique();
+            });
+
+            modelBuilder.Entity<StudentPaymentEntity>(entity =>
+            {
+                entity.HasKey(item => item.Id);
+                entity.Property(item => item.Amount).HasPrecision(18, 2);
+                entity.Property(item => item.IdempotencyKey).IsRequired().HasMaxLength(100);
+                entity.HasOne(item => item.Student)
+                    .WithMany(student => student.Payments)
+                    .HasForeignKey(item => item.StudentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(item => item.RecordedByUser)
+                    .WithMany()
+                    .HasForeignKey(item => item.RecordedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasIndex(item => new { item.StudentId, item.IdempotencyKey }).IsUnique();
+            });
+
+            modelBuilder.Entity<StudentPaymentAdjustmentEntity>(entity =>
+            {
+                entity.HasKey(item => item.Id);
+                entity.Property(item => item.AmountDelta).HasPrecision(18, 2);
+                entity.Property(item => item.Reason).IsRequired().HasMaxLength(500);
+                entity.Property(item => item.IdempotencyKey).IsRequired().HasMaxLength(100);
+                entity.HasOne(item => item.Payment)
+                    .WithMany(payment => payment.Adjustments)
+                    .HasForeignKey(item => item.PaymentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(item => item.RecordedByUser)
+                    .WithMany()
+                    .HasForeignKey(item => item.RecordedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasIndex(item => new { item.PaymentId, item.IdempotencyKey }).IsUnique();
+            });
+
+            modelBuilder.Entity<StudentLessonChargeEntity>(entity =>
+            {
+                entity.HasKey(item => item.Id);
+                entity.Property(item => item.Amount).HasPrecision(18, 2);
+                entity.HasOne(item => item.Student)
+                    .WithMany(student => student.LessonCharges)
+                    .HasForeignKey(item => item.StudentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(item => item.RecordedByUser)
+                    .WithMany()
+                    .HasForeignKey(item => item.RecordedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasIndex(item => new { item.StudentId, item.SourceLessonId }).IsUnique();
+            });
+        }
+
+        private void ConfigureHomeworkEntities(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<HomeworkEntity>(entity =>
+            {
+                entity.HasKey(item => item.Id);
+                entity.Property(item => item.Title).IsRequired().HasMaxLength(255);
+                entity.Property(item => item.Instructions).HasMaxLength(4000);
+                entity.HasOne(item => item.Student)
+                    .WithMany()
+                    .HasForeignKey(item => item.StudentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(item => item.Teacher)
+                    .WithMany()
+                    .HasForeignKey(item => item.TeacherId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(item => item.School)
+                    .WithMany()
+                    .HasForeignKey(item => item.SchoolId)
+                    .OnDelete(DeleteBehavior.SetNull);
+                entity.HasOne(item => item.Course)
+                    .WithMany()
+                    .HasForeignKey(item => item.CourseId)
+                    .OnDelete(DeleteBehavior.SetNull);
+                entity.HasIndex(item => new { item.StudentId, item.CreatedAt });
+                entity.HasIndex(item => new { item.TeacherId, item.CourseId });
+                entity.HasIndex(item => item.SchoolId);
+            });
+
+            modelBuilder.Entity<HomeworkSubmissionEntity>(entity =>
+            {
+                entity.HasKey(item => item.Id);
+                entity.Property(item => item.LinksJson).IsRequired();
+                entity.HasOne(item => item.Homework)
+                    .WithMany(homework => homework.Submissions)
+                    .HasForeignKey(item => item.HomeworkId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasIndex(item => new { item.HomeworkId, item.AttemptNumber }).IsUnique();
+            });
+
+            modelBuilder.Entity<HomeworkAttachmentEntity>(entity =>
+            {
+                entity.HasKey(item => item.Id);
+                entity.Property(item => item.StorageName).IsRequired().HasMaxLength(80);
+                entity.Property(item => item.DisplayName).IsRequired().HasMaxLength(255);
+                entity.Property(item => item.ContentType).IsRequired().HasMaxLength(100);
+                entity.HasOne(item => item.Submission)
+                    .WithMany(submission => submission.Attachments)
+                    .HasForeignKey(item => item.SubmissionId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasIndex(item => item.SubmissionId);
             });
         }
     }
