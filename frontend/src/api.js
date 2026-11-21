@@ -2,10 +2,11 @@ const API_BASE_URL =
   process.env.REACT_APP_API_URL || "https://localhost:7151/api";
 
 const request = async (path, options = {}) => {
+  const isFormData = options.body instanceof FormData;
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
-      "Content-Type": "application/json",
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
       ...options.headers,
     },
@@ -26,6 +27,18 @@ const request = async (path, options = {}) => {
 
   if (response.status === 204) return null;
   return response.json();
+};
+
+const requestBlob = async (path) => {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Request failed (${response.status})`);
+  }
+  return response.blob();
 };
 
 const jsonRequest = (method, body) => ({
@@ -78,5 +91,37 @@ export const updateNote = (studentId, noteId, note) =>
   request(`/students/${studentId}/notes/${noteId}`, jsonRequest("PUT", note));
 export const deleteNote = (studentId, noteId) =>
   request(`/students/${studentId}/notes/${noteId}`, { method: "DELETE" });
+
+export const fetchHomeworks = ({ studentId, courseId, pendingOnly } = {}) => {
+  const params = new URLSearchParams();
+  if (studentId) params.set("studentId", studentId);
+  if (courseId) params.set("courseId", courseId);
+  if (pendingOnly) params.set("pendingOnly", "true");
+  const query = params.toString();
+  return request(`/homework${query ? `?${query}` : ""}`);
+};
+
+export const createHomework = (homework) =>
+  request("/homework", jsonRequest("POST", homework));
+
+export const submitHomework = (homeworkId, { text, links, files }) => {
+  const form = new FormData();
+  if (text) form.append("Text", text);
+  form.append("LinksJson", JSON.stringify(links));
+  files.forEach((file) => form.append("Files", file));
+  return request(`/homework/${homeworkId}/submissions`, {
+    method: "POST",
+    body: form,
+  });
+};
+
+export const gradeSubmission = (submissionId, grade) =>
+  request(
+    `/homework/submissions/${submissionId}/grade`,
+    jsonRequest("POST", { grade: Number(grade) }),
+  );
+
+export const downloadHomeworkAttachment = (attachmentId) =>
+  requestBlob(`/homework/attachments/${attachmentId}`);
 
 export default API_BASE_URL;
