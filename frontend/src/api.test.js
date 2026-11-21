@@ -1,5 +1,6 @@
 import {
   createStudent,
+  fetchLessons,
   fetchHomeworks,
   fetchStudents,
   submitHomework,
@@ -49,6 +50,28 @@ describe("student API client", () => {
     await fetchHomeworks({ studentId: 7, courseId: 3 });
 
     expect(global.fetch.mock.calls[0][0]).toContain("/homework?studentId=7&courseId=3");
+  });
+
+  test("fetchLessons encodes date range and optional workspace filters", async () => {
+    global.fetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => [],
+    });
+
+    await fetchLessons({
+      from: "2026-03-01T00:00:00.000Z",
+      to: "2026-03-08T00:00:00.000Z",
+      studentId: 7,
+      courseId: 3,
+      status: "Scheduled",
+    });
+
+    const [url, options] = global.fetch.mock.calls[0];
+    expect(url).toContain("/lessons?from=2026-03-01T00%3A00%3A00.000Z");
+    expect(url).toContain("&to=2026-03-08T00%3A00%3A00.000Z");
+    expect(url).toContain("&studentId=7&courseId=3&status=Scheduled");
+    expect(options.headers.Authorization).toBe("Bearer test-token");
   });
 
   test("submitHomework lets the browser set the multipart content type", async () => {

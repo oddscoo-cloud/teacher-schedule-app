@@ -24,6 +24,7 @@ namespace backend.Data
         public DbSet<TeacherEntity> TeacherEntities { get; set; }
         public DbSet<StudentEntity> StudentEntities { get; set; }
         public DbSet<StudentAssignmentEntity> StudentAssignments { get; set; }
+        public DbSet<StudentCourseAssignmentEntity> StudentCourseAssignments { get; set; }
         public DbSet<ContactEntity> Contacts { get; set; }
         public DbSet<StudentContactEntity> StudentContacts { get; set; }
         public DbSet<CourseEntity> Courses { get; set; }
@@ -35,6 +36,9 @@ namespace backend.Data
         public DbSet<HomeworkEntity> Homeworks { get; set; }
         public DbSet<HomeworkSubmissionEntity> HomeworkSubmissions { get; set; }
         public DbSet<HomeworkAttachmentEntity> HomeworkAttachments { get; set; }
+        public DbSet<LessonSeriesEntity> LessonSeries { get; set; }
+        public DbSet<LessonEntity> LessonEvents { get; set; }
+        public DbSet<LessonRescheduleEntity> LessonReschedules { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -52,6 +56,7 @@ namespace backend.Data
             ConfigureStudentNoteEntity(modelBuilder);
             ConfigureStudentFinanceEntities(modelBuilder);
             ConfigureHomeworkEntities(modelBuilder);
+            ConfigureLessonEntities(modelBuilder);
         }
 
         private void ConfigureUserEntity(ModelBuilder modelBuilder)
@@ -369,6 +374,58 @@ namespace backend.Data
                     .HasForeignKey(item => item.SubmissionId)
                     .OnDelete(DeleteBehavior.Cascade);
                 entity.HasIndex(item => item.SubmissionId);
+            });
+        }
+
+        private void ConfigureLessonEntities(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<LessonSeriesEntity>(entity =>
+            {
+                entity.HasKey(item => item.Id);
+                entity.Property(item => item.Title).IsRequired().HasMaxLength(255);
+                entity.Property(item => item.Description).HasMaxLength(4000);
+                entity.Property(item => item.Timezone).IsRequired().HasMaxLength(100);
+                entity.HasOne<TeacherEntity>().WithMany().HasForeignKey(item => item.TeacherId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<StudentEntity>().WithMany().HasForeignKey(item => item.StudentId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<SchoolEntity>().WithMany().HasForeignKey(item => item.SchoolId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<CourseEntity>().WithMany().HasForeignKey(item => item.CourseId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasIndex(item => new { item.TeacherId, item.StudentId, item.StartDate });
+            });
+
+            modelBuilder.Entity<LessonEntity>(entity =>
+            {
+                entity.HasKey(item => item.Id);
+                entity.Property(item => item.Title).IsRequired().HasMaxLength(255);
+                entity.Property(item => item.Description).HasMaxLength(4000);
+                entity.Property(item => item.Notes).HasMaxLength(4000);
+                entity.Property(item => item.StatusReason).HasMaxLength(500);
+                entity.Property(item => item.Timezone).IsRequired().HasMaxLength(100);
+                entity.HasOne(item => item.Series).WithMany(series => series.Lessons)
+                    .HasForeignKey(item => item.SeriesId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<TeacherEntity>().WithMany().HasForeignKey(item => item.TeacherId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(item => item.Student).WithMany().HasForeignKey(item => item.StudentId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<SchoolEntity>().WithMany().HasForeignKey(item => item.SchoolId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(item => item.Course).WithMany().HasForeignKey(item => item.CourseId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<UserEntity>().WithMany().HasForeignKey(item => item.ModifiedByUserId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(item => item.RescheduledFrom).WithMany(item => item.RescheduledTo)
+                    .HasForeignKey(item => item.RescheduledFromId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasIndex(item => new { item.TeacherId, item.StudentId, item.ScheduledAtUtc });
+                entity.HasIndex(item => new { item.SeriesId, item.Status });
+                entity.HasIndex(item => new { item.SeriesId, item.SeriesInstanceIndex })
+                    .IsUnique().HasFilter("[SeriesId] IS NOT NULL AND [SeriesInstanceIndex] IS NOT NULL");
+            });
+
+            modelBuilder.Entity<LessonRescheduleEntity>(entity =>
+            {
+                entity.HasKey(item => item.Id);
+                entity.Property(item => item.RescheduleReason).HasMaxLength(500);
+                entity.HasOne(item => item.OriginalLesson).WithMany(item => item.RescheduleHistoryAsOriginal)
+                    .HasForeignKey(item => item.OriginalLessonId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(item => item.NewLesson).WithMany(item => item.RescheduleHistoryAsNew)
+                    .HasForeignKey(item => item.NewLessonId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<UserEntity>().WithMany().HasForeignKey(item => item.RescheduleByUserId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasIndex(item => item.OriginalLessonId).IsUnique();
+                entity.HasIndex(item => item.NewLessonId).IsUnique();
             });
         }
     }

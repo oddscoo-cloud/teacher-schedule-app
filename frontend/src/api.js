@@ -124,4 +124,27 @@ export const gradeSubmission = (submissionId, grade) =>
 export const downloadHomeworkAttachment = (attachmentId) =>
   requestBlob(`/homework/attachments/${attachmentId}`);
 
+export const fetchLessons = ({ from, to, studentId, courseId, status } = {}) => {
+  const params = new URLSearchParams({ from, to });
+  if (studentId) params.set("studentId", studentId);
+  if (courseId) params.set("courseId", courseId);
+  if (status) params.set("status", status);
+  return request(`/lessons?${params.toString()}`);
+};
+
+export const fetchLessonTeachers = () => request("/lessons/teachers");
+export const fetchLessonDetails = (id) => request(`/lessons/${id}`);
+export const createLesson = (lesson) =>
+  request("/lessons", jsonRequest("POST", lesson));
+export const createSeries = (series) =>
+  request("/lessons/series", jsonRequest("POST", series));
+export const updateLesson = (id, lesson) =>
+  request(`/lessons/${id}`, jsonRequest("PUT", lesson));
+export const updateLessonSeries = (id, series) =>
+  request(`/lessons/series/${id}`, jsonRequest("PUT", series));
+export const updateLessonStatus = (id, status, reason) =>
+  request(`/lessons/${id}/status`, jsonRequest("PUT", { status, reason }));
+export const rescheduleLesson = (id, scheduledAt, reason) =>
+  request(`/lessons/${id}/reschedule`, jsonRequest("POST", { scheduledAt, reason }));
+
 export default API_BASE_URL;

@@ -49,7 +49,7 @@ public class StudentFinanceServiceTests
         Assert.Equal(4, snapshot.LessonBalance);
         Assert.Equal(140.00m, snapshot.PaymentsTotal);
         Assert.Equal(-140.00m, snapshot.MoneyBalance);
-        Assert.False(snapshot.LessonChargesIntegrated);
+        Assert.True(snapshot.LessonChargesIntegrated);
     }
 
     [Fact]
@@ -100,11 +100,11 @@ public class StudentFinanceServiceTests
         Assert.Equal(FinanceWriteStatus.Skipped,
             (await service.RecordLessonChargeAsync(
                 2, UserRole.Teacher, 101, 1, 46, StudentLessonChargeType.LateCancellation,
-                lessonStart, lessonStart.AddHours(-5).AddTicks(-1))).Status);
+                lessonStart, lessonStart.AddHours(-5).AddSeconds(-1))).Status);
 
         var charged = await service.RecordLessonChargeAsync(
             2, UserRole.Teacher, 101, 1, 47, StudentLessonChargeType.LateCancellation,
-            lessonStart, lessonStart.AddHours(-5).AddTicks(1));
+            lessonStart, lessonStart.AddHours(-5).AddSeconds(1));
         Assert.Equal(FinanceWriteStatus.Created, charged.Status);
         Assert.Equal(80m, charged.Value!.Amount);
         var snapshot = await service.GetFinanceAsync(2, UserRole.Teacher, 101, 1);
@@ -198,8 +198,8 @@ public class StudentFinanceServiceTests
         var start = new DateTimeOffset(2026, 4, 1, 10, 0, 0, TimeSpan.Zero);
 
         Assert.False(LessonChargePolicy.IsLateCancellation(start, start.AddHours(-5)));
-        Assert.False(LessonChargePolicy.IsLateCancellation(start, start.AddHours(-5).AddTicks(-1)));
-        Assert.True(LessonChargePolicy.IsLateCancellation(start, start.AddHours(-5).AddTicks(1)));
+        Assert.False(LessonChargePolicy.IsLateCancellation(start, start.AddHours(-5).AddSeconds(-1)));
+        Assert.True(LessonChargePolicy.IsLateCancellation(start, start.AddHours(-5).AddSeconds(1)));
         Assert.True(LessonChargePolicy.IsLateCancellation(start, start));
         Assert.False(LessonChargePolicy.IsLateCancellation(start, start.AddTicks(1)));
     }

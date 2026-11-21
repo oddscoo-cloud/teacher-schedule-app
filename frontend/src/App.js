@@ -11,6 +11,7 @@ import StudentCard from "./components/Students/StudentCard";
 import StudentForm from "./components/Students/StudentForm";
 import SchoolCourses from "./components/Students/SchoolCourses";
 import HomeworkPage from "./components/Homework/HomeworkPage";
+import CalendarPage from "./components/Calendar/CalendarPage";
 
 function App() {
   return (
@@ -35,6 +36,38 @@ function App() {
           element={
             <ProtectedRoute role="teacher">
               <TeacherSchedule />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/calendar"
+          element={
+            <ProtectedRoute role="teacher">
+              <CalendarPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/lessons/new"
+          element={
+            <ProtectedRoute role="teacher">
+              <CalendarPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/lessons/:id"
+          element={
+            <ProtectedRoute role="teacher">
+              <CalendarPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/school/calendar"
+          element={
+            <ProtectedRoute role="schooladmin">
+              <CalendarPage />
             </ProtectedRoute>
           }
         />

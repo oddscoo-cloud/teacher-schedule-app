@@ -59,6 +59,14 @@ function Header() {
                 Расписание
               </NavLink>
             )}
+            {canManageSchedule && (
+              <NavLink
+                to={isAdmin ? "/admin/school/calendar" : "/teacher/calendar"}
+                className={({ isActive }) => `app-nav-link${isActive ? " active" : ""}`}
+              >
+                Календарь
+              </NavLink>
+            )}
             <NavLink
               to={basePath}
               className={({ isActive }) => `app-nav-link${isActive ? " active" : ""}`}
