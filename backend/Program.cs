@@ -4,6 +4,7 @@ using backend.Data;
 using backend.Infrastructure.Repositories;
 using backend.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -13,6 +14,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 // builder.Services.AddSwaggerGen();  TODO: Fix Swagger compatibility with .NET 10
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 30_000_000;
+});
+builder.Services.Configure<HomeworkFileStorageOptions>(
+    builder.Configuration.GetSection("HomeworkFiles"));
+builder.Services.PostConfigure<HomeworkFileStorageOptions>(options =>
+{
+    if (string.IsNullOrWhiteSpace(options.StoragePath))
+        options.StoragePath = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "homework");
+});
 
 // Configure JWT
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -72,6 +84,8 @@ builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IStudentAssignmentService, StudentAssignmentService>();
 builder.Services.AddScoped<IStudentNoteService, StudentNoteService>();
+builder.Services.AddScoped<IHomeworkService, HomeworkService>();
+builder.Services.AddSingleton<IHomeworkFileStorage, HomeworkFileStorage>();
 
 var app = builder.Build();
 

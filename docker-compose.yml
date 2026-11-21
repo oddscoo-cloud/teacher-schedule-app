@@ -24,9 +24,12 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: Server=db,1433;Database=TeacherScheduleDb;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=True
+      HomeworkFiles__StoragePath: /app/App_Data/homework
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - homework_files:/app/App_Data/homework
     ports:
       - "5101:8080"
 
@@ -49,3 +52,4 @@ services:
 volumes:
   sql_data:
   frontend_node_modules:
+  homework_files:
